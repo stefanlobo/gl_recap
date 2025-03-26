@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:guillotine_recap/constants.dart';
+import 'package:guillotine_recap/app/constants.dart';
 
 import 'error_handler.dart';
 import 'network_info.dart';

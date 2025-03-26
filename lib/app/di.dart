@@ -2,8 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:guillotine_recap/network/api_service.dart';
 import 'package:guillotine_recap/network/dio_factory.dart';
 import 'package:guillotine_recap/network/network_info.dart';
-import 'package:guillotine_recap/repository/league.dart';
-import 'package:guillotine_recap/repository/repo.dart';
+import 'package:guillotine_recap/repository/repository_impl.dart';
+import 'package:guillotine_recap/repository/repository.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 
@@ -26,7 +26,5 @@ Future<void> initAppModule() async {
   //AppServiceClient instance
   instance.registerLazySingleton(() => ApiService(dio, instance(),));
 
-
-  instance.registerFactory<Repository>(() => RepositoryImpl(instance()));
-
+  instance.registerFactoryParam<Repository, String, void>((leagueId, _) => RepositoryImpl(instance(), leagueId));
 }

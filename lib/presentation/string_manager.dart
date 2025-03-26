@@ -8,7 +8,7 @@ class AppStrings {
   static const String strNoContent = "no_content";
   static const String strForbiddenError = "forbidden_error";
   static const String strUnauthorizedError = "unauthorized_error";
-  static const String strNotFoundError = "not_found_error";
+  static const String strNotFoundError = "No data found for inputted league number";
   static const String strConflictError = "conflict_error";
   static const String strInternalServerError = "internal_server_error";
   static const String strUnknownError = "unknown_error";
@@ -16,4 +16,6 @@ class AppStrings {
   static const String strDefaultError = "default_error";
   static const String strCacheError = "cache_error";
   static const String strNoInternetError = "no_internet_error";
+  static const String tooManyRequests = 'Too many requests';
+  static const String serviceUnavailable = 'Service unavailable';
 }

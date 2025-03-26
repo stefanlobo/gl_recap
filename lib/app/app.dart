@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/network/api_service.dart';
-import 'package:guillotine_recap/repository/league.dart';
-import 'package:guillotine_recap/repository/repo.dart';
+import 'package:guillotine_recap/repository/repository_impl.dart';
+import 'package:guillotine_recap/repository/repository.dart';
 import 'package:guillotine_recap/screen/home_screen.dart';
-import 'package:guillotine_recap/di.dart';
+import 'package:guillotine_recap/app/di.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,31 +36,46 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final leagueController = TextEditingController();
 
-  final rosters = instance<Repository>();
-  
+  //final rosters = instance<Repository>(param1: "1124849636478046208");
+  List<Roster> rosters = [];
   String _result = '';
+  bool _isLoading = false;
 
-  // Future<void> _fetchLeagueData() async {
-  //   final leaguenumber = leagueController.text;
+  Future<void> _fetchLeagueData() async {
+    final leaguenumber = leagueController.text;
 
-  //   if (leaguenumber.isEmpty) {
-  //     setState(() {
-  //       _result = 'Please enter a league number';
-  //     });
-  //     return;
-  //   }
+    if (leaguenumber.isEmpty) {
+      setState(() {
+        _result = 'Please enter a league number';
+      });
+      return;
+    }
 
-  //   try {
-  //     final response = league.getLeague(leaguenumber);
-  //     setState(() {
-  //       _result = 'Response: ${response}';
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       _result = 'Error $e';
-  //     });
-  //   }
-  // }
+    setState(() {
+      _isLoading = true;
+      _result = 'Loading...';
+      rosters = []; // Clear previous data
+    });
+
+    try {
+      final repo = instance<Repository>(param1: leaguenumber);
+      final result = await repo.getRoster();
+
+      result.fold(
+        (failure) => setState(() {
+          _result = 'Error: ${failure.message}';
+        }),
+        (data) => setState(() {
+          _result = 'Found ${data.length} rosters';
+          rosters = data;
+        }),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -72,35 +88,68 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
             TextField(
               controller: leagueController,
               keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Enter League ID',
+                border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: _fetchLeagueData,
+                ),
+              ),
             ),
-            Text(_result),
+            const SizedBox(height: 16),
+            if (_isLoading)
+              const CircularProgressIndicator()
+            else if (_result.isNotEmpty)
+              Text(_result, style: Theme.of(context).textTheme.bodyLarge),
+            const SizedBox(height: 16),
+            Expanded(
+              // Key fix - makes ListView scrollable
+              child: rosters.isEmpty
+                  ? const Center(child: Text('No rosters found'))
+                  : ListView.builder(
+                      itemCount: rosters.length,
+                      itemBuilder: (context, index) {
+                        final roster = rosters[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: ListTile(
+                            title: Text("Roster ${roster.rosterId}"),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Owner: ${roster.ownerId}"),
+                                if (roster.players != null)
+                                  Text("Players: ${roster.players!.length}"),
+                              ],
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              // Handle tap
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     _fetchLeagueData();
-      //   },
-      //   tooltip: 'Increment',
-      //   child: const Icon(Icons.add),
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _fetchLeagueData,
+        tooltip: 'Fetch Rosters',
+        child: const Icon(Icons.refresh),
+      ),
     );
   }
 }

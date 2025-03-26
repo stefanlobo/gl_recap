@@ -2,13 +2,24 @@ import 'package:dio/dio.dart';
 import 'package:guillotine_recap/network/failure.dart';
 import 'package:guillotine_recap/presentation/string_manager.dart';
 
+DioException createEmptyDataException(Response response) {
+  return DioException(
+    requestOptions: response.requestOptions,
+    response: Response(
+      statusCode: 404, // or 404 if appropriate
+      statusMessage: 'No content',
+      requestOptions: response.requestOptions,
+      data: {'error': 'No data found for this input'},
+    ),
+    type: DioExceptionType.badResponse,
+    message: 'Server returned empty data',
+  );
+}
+
 class ErrorHandler implements Exception {
   late Failure failure;
 
   ErrorHandler.handle(dynamic error) {
-    print("here");
-    print(error);
-
     if (error is DioException) {
       // dio error so its an error from response of the API or from dio itself
       failure = _handleError(error);
@@ -98,6 +109,8 @@ enum DataSource {
   sendTimeout,
   cacheError,
   noInternetConnection,
+  tooManyRequests,
+  serviceUnavailable,
   defaultError
 }
 
@@ -137,6 +150,12 @@ extension DataSourceExtension on DataSource {
       case DataSource.noInternetConnection:
         return Failure(ResponseCode.noInternetConnection,
             ResponseMessage.noInternetConnection);
+      case DataSource.tooManyRequests:
+        return Failure(
+            ResponseCode.tooManyRequests, ResponseMessage.tooManyRequests);
+      case DataSource.serviceUnavailable:
+        return Failure(ResponseCode.serviceUnavailable,
+            ResponseMessage.serviceUnavailable);
       case DataSource.defaultError:
         return Failure(ResponseCode.defaultError, ResponseMessage.defaultError);
     }
@@ -145,13 +164,15 @@ extension DataSourceExtension on DataSource {
 
 class ResponseCode {
   static const int success = 200; // success with data
-  static const int noContent = 201; // success with no data (no content)
+  static const int noContent = 200; // success with no data (no content)
   static const int badRequest = 400; // failure, API rejected request
   static const int unauthorised = 401; // failure, user is not authorised
   static const int forbidden = 403; //  failure, API rejected request
   static const int internalServerError = 500; // failure, crash in server side
   static const int notFound = 404; // failure, not found
   static const int invalidData = 422; // failure, not found
+  static const int tooManyRequests = 429;
+  static const int serviceUnavailable = 503;
 
   // local status code
   static const int connectTimeout = -1;
@@ -189,6 +210,8 @@ class ResponseMessage {
   static const String noInternetConnection = AppStrings.strNoInternetError;
   static const String defaultError = AppStrings.strDefaultError;
   static const String connectionError = AppStrings.strDefaultError;
+  static const String tooManyRequests = AppStrings.tooManyRequests;
+  static const String serviceUnavailable = AppStrings.serviceUnavailable;
 }
 
 class ApiInternalStatus {
