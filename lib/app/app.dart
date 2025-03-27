@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/network/api_service.dart';
+import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/repository/repository_impl.dart';
 import 'package:guillotine_recap/repository/repository.dart';
 import 'package:guillotine_recap/screen/home_screen.dart';
@@ -24,63 +26,28 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final leagueController = TextEditingController();
+class _MyHomePageState extends ConsumerState<MyHomePage> {
+  final _leagueController = TextEditingController();
 
-  //final rosters = instance<Repository>(param1: "1124849636478046208");
-  List<Roster> rosters = [];
-  String _result = '';
-  bool _isLoading = false;
-
-  Future<void> _fetchLeagueData() async {
-    final leaguenumber = leagueController.text;
-
-    if (leaguenumber.isEmpty) {
-      setState(() {
-        _result = 'Please enter a league number';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _result = 'Loading...';
-      rosters = []; // Clear previous data
-    });
-
-    try {
-      final repo = instance<Repository>(param1: leaguenumber);
-      final result = await repo.getRoster();
-
-      result.fold(
-        (failure) => setState(() {
-          _result = 'Error: ${failure.message}';
-        }),
-        (data) => setState(() {
-          _result = 'Found ${data.length} rosters';
-          rosters = data;
-        }),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _leagueController.text = ref.read(leagueNumberProvider);
   }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    leagueController.dispose();
+    _leagueController.dispose();
     super.dispose();
   }
 
@@ -96,57 +63,71 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             TextField(
-              controller: leagueController,
+              controller: _leagueController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Enter League ID',
                 border: OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: Icon(Icons.search),
-                  onPressed: _fetchLeagueData,
+                  onPressed: () {
+                    ref.read(leagueNumberProvider.notifier).state =
+                        _leagueController.text;
+                  },
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            if (_isLoading)
-              const CircularProgressIndicator()
-            else if (_result.isNotEmpty)
-              Text(_result, style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height: 16),
             Expanded(
-              // Key fix - makes ListView scrollable
-              child: rosters.isEmpty
-                  ? const Center(child: Text('No rosters found'))
-                  : ListView.builder(
-                      itemCount: rosters.length,
-                      itemBuilder: (context, index) {
-                        final roster = rosters[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          child: ListTile(
-                            title: Text("Roster ${roster.rosterId}"),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Owner: ${roster.ownerId}"),
-                                if (roster.players != null)
-                                  Text("Players: ${roster.players!.length}"),
-                              ],
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              // Handle tap
-                            },
-                          ),
-                        );
-                      },
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final rosterAsync = ref.watch(rosterProvider);
+
+                  return rosterAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => Center(
+                      child: Text('Error: ${error.toString()}'),
                     ),
+                    data: (rosters) {
+                      if (rosters.isEmpty) {
+                        return const Center(child: Text('No rosters found'));
+                      }
+
+                      return ListView.builder(
+                        itemCount: rosters.length,
+                        itemBuilder: (context, index) {
+                          final roster = rosters[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            child: ListTile(
+                              title: Text("Roster ${roster.rosterId}"),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Owner: ${roster.ownerId}"),
+                                  if (roster.players != null)
+                                    Text("Players: ${roster.players}"),
+                                ],
+                              ),
+                              trailing: const Icon(Icons.cabin),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _fetchLeagueData,
+        onPressed: () {
+          ref.read(leagueNumberProvider.notifier).state =
+              _leagueController.text;
+        },
         tooltip: 'Fetch Rosters',
         child: const Icon(Icons.refresh),
       ),

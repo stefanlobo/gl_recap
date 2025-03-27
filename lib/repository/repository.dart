@@ -6,7 +6,6 @@ import 'package:guillotine_recap/network/failure.dart';
 
 
 abstract class Repository {
-  Future<Either<Failure, List<Roster>>> getRoster();
-
-  Future<Either<Failure, League>> getLeague();
+  Future<List<Roster>> getRoster({required String leagueId});
+  Future<League> getLeague({required String leagueId});
 }

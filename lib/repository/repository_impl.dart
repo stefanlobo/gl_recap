@@ -8,19 +8,19 @@ import 'package:guillotine_recap/network/error_handler.dart';
 import 'package:guillotine_recap/network/failure.dart';
 import 'package:guillotine_recap/repository/repository.dart';
 
-class RepositoryImpl extends Repository {
+class RepositoryImpl implements Repository {
   final ApiService _apiService;
-  final String leagueId;
 
-  RepositoryImpl(this._apiService, this.leagueId);
+  RepositoryImpl(this._apiService);
 
   @override
-  Future<Either<Failure, List<Roster>>> getRoster() async {
+  Future<List<Roster>> getRoster({required String leagueId}) async {
     try {
       final response =
           await _apiService.get(endPoint: "league/$leagueId/rosters");
 
-      if (response.data == null || (response.data is List && response.data.isEmpty)) {
+      if (response.data == null ||
+          (response.data is List && response.data.isEmpty)) {
         throw createEmptyDataException(response);
       }
 
@@ -29,19 +29,20 @@ class RepositoryImpl extends Repository {
       // return data
       final data = convertListToModel(Roster.fromJson, response.data!);
 
-      return Right(data);
+      return data;
     } catch (error) {
-      return Left(ErrorHandler.handle(error).failure);
+      throw ErrorHandler.handle(error).failure;
     }
   }
 
   @override
-  Future<Either<Failure, League>> getLeague() async {
+  Future<League> getLeague({required String leagueId}) async {
     try {
       final response =
           await _apiService.get(endPoint: "league/$leagueId/rosters");
 
-      if (response.data == null || (response.data is List && response.data.isEmpty)) {
+      if (response.data == null ||
+          (response.data is List && response.data.isEmpty)) {
         throw createEmptyDataException(response);
       }
 
@@ -50,9 +51,9 @@ class RepositoryImpl extends Repository {
       // return data
       final data = convertMapToModel(League.fromJson, response.data!);
 
-      return Right(data);
+      return data;
     } catch (error) {
-      return Left(ErrorHandler.handle(error).failure);
+      throw ErrorHandler.handle(error).failure;
     }
   }
 }
