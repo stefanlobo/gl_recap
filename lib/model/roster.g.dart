@@ -7,15 +7,18 @@ part of 'roster.dart';
 // **************************************************************************
 
 Roster _$RosterFromJson(Map<String, dynamic> json) => Roster(
-      (json['starters'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      json['settings'] == null
-          ? null
-          : RosterSettings.fromJson(json['settings'] as Map<String, dynamic>),
-      (json['roster_id'] as num?)?.toInt(),
-      (json['reserve'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      (json['players'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      json['owner_id'] as String?,
-      json['league_id'] as String?,
+      starters: (json['starters'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      settings:
+          RosterSettings.fromJson(json['settings'] as Map<String, dynamic>),
+      rosterId: (json['roster_id'] as num).toInt(),
+      reserve:
+          (json['reserve'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      players:
+          (json['players'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      ownerId: json['owner_id'] as String,
+      leagueId: json['league_id'] as String,
     );
 
 Map<String, dynamic> _$RosterToJson(Roster instance) => <String, dynamic>{

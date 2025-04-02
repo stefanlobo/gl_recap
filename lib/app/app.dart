@@ -81,7 +81,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             Expanded(
               child: Consumer(
                 builder: (context, ref, child) {
-                  final rosterAsync = ref.watch(rosterProvider);
+                  final rosterAsync = ref.watch(combinedRosterProvider);
 
                   return rosterAsync.when(
                     loading: () =>
@@ -89,15 +89,16 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     error: (error, stack) => Center(
                       child: Text('Error: ${error.toString()}'),
                     ),
-                    data: (rosters) {
-                      if (rosters.isEmpty) {
+                    data: (combined) {
+                      if (combined.rosterMap.isEmpty) {
                         return const Center(child: Text('No rosters found'));
                       }
 
                       return ListView.builder(
-                        itemCount: rosters.length,
+                        itemCount: combined.rosters.length,
                         itemBuilder: (context, index) {
-                          final roster = rosters[index];
+                          // Get the roster ID from the map keys
+                          final roster = combined.rosters[index];
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             child: ListTile(
@@ -105,9 +106,30 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("Owner: ${roster.ownerId}"),
-                                  if (roster.players != null)
-                                    Text("Players: ${roster.players}"),
+                                  Text("Owner: ${roster.displayName}"),
+                                  if (roster.deathPlayers != null)
+                                    Text("Players: ${roster.deathPlayers}"),
+                                  if (roster.weeks.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    const Text("Weekly Points:",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+
+                                    // Display points for each week
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children:
+                                          roster.weeks.entries.map((weekEntry) {
+                                        final weekNum = weekEntry.key;
+                                        final matchup = weekEntry.value;
+                                        return Text(
+                                          "Week $weekNum: ${matchup.points} points",
+                                          style: const TextStyle(fontSize: 12),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
                                 ],
                               ),
                               trailing: const Icon(Icons.cabin),

@@ -1,51 +1,16 @@
+import 'package:guillotine_recap/model/roster_league.dart';
+
 class Combined {
-  final String userId; 
-  final String username;
-  final String displayName;
-  final String avatar; 
-  final int rosterId;
+  //rosterid : league member info
+  final Map<int, RosterLeague> rosterMap;
 
-  // Death Data
-  final List<String>? deathStarters;
-  final List<String>? deathPlayers;
-  final int deathPoints;
+  Combined({required this.rosterMap});
 
-  // Weeks data
-  final Map<String, Map> weeks;
+  List<RosterLeague> get rosters => rosterMap.values.toList();
 
-  Combined({
-    required this.userId,
-    required this.username,
-    required this.displayName,
-    required this.rosterId,
-    this.avatar = '', 
-    this.deathStarters,
-    this.deathPlayers,
-    this.deathPoints = 0, 
-    this.weeks = const {}, // Initialize with an empty map
-  });
+  List<int> get rosterIds => rosterMap.keys.toList();
 
-  Combined copyWith({
-      String? userId, 
-     String? username,
-     String? displayName,
-     String? avatar, 
-     int? rosterId,
-     List<String>? deathStarters,
-     List<String>? deathPlayers,
-     int? deathPoints,
-     Map<String,Map>? weeks,
-  }) {
-    return Combined(
-      userId: userId ?? this.userId,
-      username: username ?? this.username,
-      displayName: displayName ?? this.displayName,
-      avatar: avatar ?? this.avatar,
-      rosterId: rosterId ?? this.rosterId,
-      deathStarters: deathStarters ?? this.deathStarters,
-      deathPlayers: deathPlayers ?? this.deathPlayers,
-      deathPoints: deathPoints ?? this.deathPoints,
-      weeks: weeks ?? this.weeks,
-    );
+  RosterLeague getRoster(int rosterId) {
+    return rosterMap[rosterId]!;
   }
 }

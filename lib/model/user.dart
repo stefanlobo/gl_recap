@@ -8,9 +8,6 @@ class User {
   @JsonKey(name: 'user_id')
   final String userId;
 
-  @JsonKey(name: 'username')
-  final String username;
-
   @JsonKey(name: 'display_name')
   final String displayName;
 
@@ -25,7 +22,6 @@ class User {
 
   User({
     required this.userId,
-    required this.username,
     required this.displayName,
     required this.avatar,
     required this.metadata,

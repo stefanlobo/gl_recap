@@ -1,0 +1,52 @@
+import 'package:guillotine_recap/model/matchup_week.dart';
+
+class RosterLeague {
+  final String userId;
+  final String displayName;
+  final String avatar;
+  final int rosterId;
+  final List<double>? truePoints;
+
+  // Death Data
+  final List<String>? deathStarters;
+  final List<String>? deathPlayers;
+  final int deathPoints;
+
+  // Weeks data
+  // week # : Matchup Info (points, players, etc)
+  final Map<int, MatchupWeek> weeks;
+
+  RosterLeague({
+    required this.userId,
+    required this.displayName,
+    required this.rosterId,
+    this.avatar = '',
+    this.deathStarters,
+    this.deathPlayers,
+    this.deathPoints = 0,
+    this.weeks = const {},// Initialize with an empty map
+    this.truePoints = const [] 
+  });
+
+  RosterLeague copyWith({
+    String? userId,
+    String? displayName,
+    String? avatar,
+    int? rosterId,
+    List<String>? deathStarters,
+    List<String>? deathPlayers,
+    int? deathPoints,
+    Map<int, MatchupWeek>? weeks,
+  }) {
+    return RosterLeague(
+      userId: userId ?? this.userId,
+      displayName: displayName ?? this.displayName,
+      avatar: avatar ?? this.avatar,
+      rosterId: rosterId ?? this.rosterId,
+      deathStarters: deathStarters ?? this.deathStarters,
+      deathPlayers: deathPlayers ?? this.deathPlayers,
+      deathPoints: deathPoints ?? this.deathPoints,
+      weeks: weeks ?? this.weeks,
+    );
+  }
+}
