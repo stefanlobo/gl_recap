@@ -18,17 +18,17 @@ class RosterLeague {
 
   int get weeksLength => weeks.length;
 
-  RosterLeague({
-    required this.userId,
-    required this.displayName,
-    required this.rosterId,
-    this.avatar = '',
-    this.deathStarters,
-    this.deathPlayers,
-    this.deathPoints = 0,
-    this.weeks = const {},// Initialize with an empty map
-    this.truePoints = const [] 
-  });
+
+  RosterLeague(
+      {required this.userId,
+      required this.displayName,
+      required this.rosterId,
+      this.avatar = '',
+      this.deathStarters,
+      this.deathPlayers,
+      this.deathPoints = 0,
+      this.weeks = const {}, // Initialize with an empty map
+      this.truePoints = const []});
 
   RosterLeague copyWith({
     String? userId,
@@ -39,6 +39,7 @@ class RosterLeague {
     List<String>? deathPlayers,
     double? deathPoints,
     Map<int, MatchupWeek>? weeks,
+    List<double>? truePoints,
   }) {
     return RosterLeague(
       userId: userId ?? this.userId,
@@ -49,6 +50,7 @@ class RosterLeague {
       deathPlayers: deathPlayers ?? this.deathPlayers,
       deathPoints: deathPoints ?? this.deathPoints,
       weeks: weeks ?? this.weeks,
+      truePoints: truePoints ?? this.truePoints,
     );
   }
 }

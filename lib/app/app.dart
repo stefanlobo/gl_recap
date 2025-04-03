@@ -37,6 +37,7 @@ class MyHomePage extends ConsumerStatefulWidget {
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
   final _leagueController = TextEditingController();
+  String? selectedUser; // Holds the selected user
 
   @override
   void initState() {
@@ -94,48 +95,89 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         return const Center(child: Text('No rosters found'));
                       }
 
-                      return ListView.builder(
-                        itemCount: combined.rosters.length,
-                        itemBuilder: (context, index) {
-                          // Get the roster ID from the map keys
-                          final roster = combined.rosters[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            child: ListTile(
-                              title: Text("Roster ${roster.rosterId}"),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Owner: ${roster.displayName}"),
-                                  if (roster.deathPlayers != null)
-                                    Text("Players: ${roster.deathPlayers}"),
-                                  if (roster.weeks.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
-                                    const Text("Weekly Points:",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (combined.rosterMap.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: DropdownMenu<String>(
+                                initialSelection: selectedUser,
+                                onSelected: (String? newValue) {
+                                  setState(() {
+                                    selectedUser = newValue;
+                                  });
+                                },
+                             dropdownMenuEntries:[
+                                DropdownMenuEntry(value: 'None', label: 'None'),
+                                ...combined.rosterMap.entries.map((entry) {
+                                  final rosterId = entry.key;
+                                  final userName = entry.value.displayName;
 
-                                    // Display points for each week
-                                    Column(
+                                  return DropdownMenuEntry<String>(
+                                    value: rosterId.toString(),
+                                    label: userName,
+                                  );
+                                }).toList(),]
+                              ),
+                            ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: combined.rosters.length,
+                              itemBuilder: (context, index) {
+                                // Get the roster ID from the map keys
+                                final roster = combined.rosters[index];
+                                return Card(
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  child: ListTile(
+                                    title: Text("Roster ${roster.rosterId}"),
+                                    subtitle: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      children:
-                                          roster.weeks.entries.map((weekEntry) {
-                                        final weekNum = weekEntry.key;
-                                        final matchup = weekEntry.value;
-                                        return Text(
-                                          "Week $weekNum: ${matchup.points} points",
-                                          style: const TextStyle(fontSize: 12),
-                                        );
-                                      }).toList(),
+                                      children: [
+                                        Text("Owner: ${roster.displayName}"),
+                                        if (roster.deathPlayers != null)
+                                          Text(
+                                              "Players: ${roster.deathPlayers}"),
+                                        if (roster.weeks.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          const Text("Weekly Points:",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold)),
+
+                                          // Display points for each week
+                                          Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                    height: (roster.truePoints
+                                                                ?.length ??
+                                                            0) *
+                                                        20.0, // Adjust height based on item count
+                                                    child: ListView.builder(
+                                                        shrinkWrap: true,
+                                                        physics:
+                                                            const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
+                                                        itemCount: roster
+                                                            .truePoints?.length,
+                                                        itemBuilder:
+                                                            (context, index) {
+                                                          return Text(
+                                                              "Week ${index + 1}: ${roster.truePoints?[index]}");
+                                                        }))
+                                              ]),
+                                        ],
+                                      ],
                                     ),
-                                  ],
-                                ],
-                              ),
-                              trailing: const Icon(Icons.cabin),
+                                    trailing: const Icon(Icons.cabin),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       );
                     },
                   );

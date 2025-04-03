@@ -82,7 +82,6 @@ final combinedRosterProvider = FutureProvider.autoDispose<Combined>(
 
     final combined =
         Combined(rosters: rosters, users: users, weeklyData: weeks);
-    combined.calculateGuilotineInfo();
     return combined;
   },
 );
