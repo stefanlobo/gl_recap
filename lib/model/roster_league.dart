@@ -5,16 +5,18 @@ class RosterLeague {
   final String displayName;
   final String avatar;
   final int rosterId;
-  final List<double>? truePoints;
+  List<double>? truePoints;
 
   // Death Data
-  final List<String>? deathStarters;
-  final List<String>? deathPlayers;
-  final int deathPoints;
+  List<String>? deathStarters;
+  List<String>? deathPlayers;
+  double? deathPoints;
 
   // Weeks data
   // week # : Matchup Info (points, players, etc)
   final Map<int, MatchupWeek> weeks;
+
+  int get weeksLength => weeks.length;
 
   RosterLeague({
     required this.userId,
@@ -35,7 +37,7 @@ class RosterLeague {
     int? rosterId,
     List<String>? deathStarters,
     List<String>? deathPlayers,
-    int? deathPoints,
+    double? deathPoints,
     Map<int, MatchupWeek>? weeks,
   }) {
     return RosterLeague(

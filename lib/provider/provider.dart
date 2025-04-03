@@ -61,15 +61,28 @@ final weeksProvider =
   return weeks;
 });
 
-final combinedRosterProvider =
-    FutureProvider.autoDispose<Combined>((ref) async {
-  final users = await ref.watch(usersProvider.future);
-  final rosters = await ref.watch(rosterProvider.future);
-  final weeks = await ref.watch(weeksProvider.future);
+// final combinedRosterProvider =
+//     FutureProvider.autoDispose<Combined>((ref) async {
+//   final users = await ref.watch(usersProvider.future);
+//   final rosters = await ref.watch(rosterProvider.future);
+//   final weeks = await ref.watch(weeksProvider.future);
 
-  final combined = await ref
-      .read(sleeperRepositoryProvider)
-      .combineData(rosters: rosters, users: users, weeklyData: weeks);
+//   final combined = await ref
+//       .read(sleeperRepositoryProvider)
+//       .combineData(rosters: rosters, users: users, weeklyData: weeks);
 
-  return combined;
-});
+//   return combined;
+// });
+
+final combinedRosterProvider = FutureProvider.autoDispose<Combined>(
+  (ref) async {
+    final users = await ref.watch(usersProvider.future);
+    final rosters = await ref.watch(rosterProvider.future);
+    final weeks = await ref.watch(weeksProvider.future);
+
+    final combined =
+        Combined(rosters: rosters, users: users, weeklyData: weeks);
+    combined.calculateGuilotineInfo();
+    return combined;
+  },
+);

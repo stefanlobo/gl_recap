@@ -12,10 +12,10 @@ import 'package:guillotine_recap/network/error_handler.dart';
 import 'package:guillotine_recap/network/failure.dart';
 import 'package:guillotine_recap/repository/repository.dart';
 
-class RepositoryImpl implements Repository {
+class SleeperRepositoryImpl implements SleeperRepository {
   final ApiService _apiService;
 
-  RepositoryImpl(this._apiService);
+  SleeperRepositoryImpl(this._apiService);
 
   @override
   Future<List<Roster>> getRoster({required String leagueId}) async {
@@ -115,44 +115,5 @@ class RepositoryImpl implements Repository {
     } catch (error) {
       throw ErrorHandler.handle(error).failure;
     }
-  }
-
-  @override
-  Combined combineData(
-      {required List<Roster> rosters,
-      required List<User> users,
-      required Map<int, Map<int, MatchupWeek>> weeklyData}) {
-    final userMap = {for (var user in users) user.userId: user};
-
-    final rosterMap = <int, RosterLeague>{};
-
-    for (final roster in rosters) {
-      final user = userMap[roster.ownerId];
-
-      final rosterID = roster.rosterId;
-
-      if (user != null) {
-        final weeksMap = <int, MatchupWeek>{};
-
-        for (final weekEntry in weeklyData.entries) {
-          final matchup = weekEntry.value[rosterID];
-          if (matchup != null) {
-            weeksMap[weekEntry.key] = matchup;
-          }
-        }
-
-        final roster_week = RosterLeague(
-            userId: user.userId,
-            displayName: user.displayName,
-            rosterId: roster.rosterId,
-            avatar: user.avatar,
-            weeks: weeksMap);
-
-        rosterMap[roster_week.rosterId] = roster_week;
-      }
-    }
-
-    print(rosterMap);
-    return Combined(rosterMap: rosterMap);
   }
 }

@@ -11,7 +11,6 @@ import 'package:guillotine_recap/repository/repository_impl.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-
 final dioProvider = FutureProvider<Dio>((ref) async {
   return DioFactory().getDio();
 });
@@ -26,7 +25,7 @@ final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(dio, networkInfo);
 });
 
-final sleeperRepositoryProvider = Provider<Repository>((ref) {
+final sleeperRepositoryProvider = Provider<SleeperRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
-  return RepositoryImpl(apiService);
+  return SleeperRepositoryImpl(apiService);
 });
