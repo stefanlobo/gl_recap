@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:guillotine_recap/app/convert.dart';
 import 'package:guillotine_recap/app/di.dart';
-import 'package:guillotine_recap/model/combined.dart';
 import 'package:guillotine_recap/model/league.dart';
 import 'package:guillotine_recap/model/matchup_week.dart';
 import 'package:guillotine_recap/model/roster.dart';
+import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/model/user.dart';
 import 'package:guillotine_recap/network/api_service.dart';
 import 'package:guillotine_recap/network/dio_factory.dart';
@@ -61,27 +61,85 @@ final weeksProvider =
   return weeks;
 });
 
-// final combinedRosterProvider =
-//     FutureProvider.autoDispose<Combined>((ref) async {
-//   final users = await ref.watch(usersProvider.future);
-//   final rosters = await ref.watch(rosterProvider.future);
-//   final weeks = await ref.watch(weeksProvider.future);
+final filterUserIdProvider = StateProvider<String?>((ref) {
+  return null;
+});
 
-//   final combined = await ref
-//       .read(sleeperRepositoryProvider)
-//       .combineData(rosters: rosters, users: users, weeklyData: weeks);
-
-//   return combined;
-// });
-
-final combinedRosterProvider = FutureProvider.autoDispose<Combined>(
+final combinedRosterProvider = FutureProvider.autoDispose<List<RosterLeague>>(
   (ref) async {
     final users = await ref.watch(usersProvider.future);
     final rosters = await ref.watch(rosterProvider.future);
-    final weeks = await ref.watch(weeksProvider.future);
+    final weeksData = await ref.watch(weeksProvider.future);
 
-    final combined =
-        Combined(rosters: rosters, users: users, weeklyData: weeks);
-    return combined;
+    final userMap = {for (var user in users) user.userId: user};
+
+    final rosterLeagues = <RosterLeague>[];
+
+    for (final roster in rosters) {
+      final user = userMap[roster.ownerId];
+
+      if (user != null) {
+        final weeksMap = <int, MatchupWeek>{};
+
+        for (final weekEntry in weeksData.entries) {
+          final matchup = weekEntry.value[roster.rosterId];
+          if (matchup != null) {
+            weeksMap[weekEntry.key] = matchup;
+          }
+        }
+
+        rosterLeagues.add(RosterLeague(
+            userId: user.userId,
+            displayName: user.displayName,
+            rosterId: roster.rosterId,
+            avatar: user.avatar,
+            weeks: weeksMap));
+      }
+    }
+
+    // Now calculate all the derived values in one go
+    if (rosterLeagues.isNotEmpty) {
+      RosterLeagueCalculator.calculateAllRosterStats(rosterLeagues);
+    }
+
+    return rosterLeagues;
   },
 );
+
+final filteredRosterLeaguesProvider = Provider.autoDispose<List<RosterLeague>>((ref) {
+  
+  // Get the unfiltered data
+  final allRosterLeaguesAsync = ref.watch(combinedRosterProvider);
+  // Get the filter
+  final filteredUserName = ref.watch(filterUserIdProvider);
+  
+  // Return a loading state while waiting for unfiltered data
+  return allRosterLeaguesAsync.when(
+    loading: () => [],
+    error: (_, __) => [],
+    data: (allRosterLeagues) {
+      // Apply filter if there is one
+      final filteredLeagues = filteredUserName != null
+          ? allRosterLeagues.where((rl) => rl.displayName != filteredUserName).toList()
+          : List<RosterLeague>.from(allRosterLeagues);
+      
+      // Calculate the stats if we have leagues
+      if (filteredLeagues.isNotEmpty) {
+        // Create deep copies to avoid modifying the original objects
+        final leagueCopies = filteredLeagues.map((rl) => RosterLeague(
+          userId: rl.userId,
+          displayName: rl.displayName,
+          rosterId: rl.rosterId,
+          avatar: rl.avatar,
+          weeks: Map.from(rl.weeks),
+        )).toList();
+        
+        // Calculate stats
+        RosterLeagueCalculator.calculateAllRosterStats(leagueCopies);
+        return leagueCopies;
+      }
+      
+      return [];
+    },
+  );
+});

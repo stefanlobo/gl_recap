@@ -82,51 +82,74 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             Expanded(
               child: Consumer(
                 builder: (context, ref, child) {
-                  final rosterAsync = ref.watch(combinedRosterProvider);
+                  // Watch the allRosterLeaguesProvider to get loading/error states
+                  final allRosterLeaguesAsync =
+                      ref.watch(combinedRosterProvider);
+                  // Watch the filtered results (not async)
+                  final filteredRosters =
+                      ref.watch(filteredRosterLeaguesProvider);
+                  final currentFilter = ref.watch(filterUserIdProvider);
 
-                  return rosterAsync.when(
+                  return allRosterLeaguesAsync.when(
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => Center(
                       child: Text('Error: ${error.toString()}'),
                     ),
-                    data: (combined) {
-                      if (combined.rosterMap.isEmpty) {
+                    data: (_) {
+                      if (filteredRosters.isEmpty && currentFilter == null) {
                         return const Center(child: Text('No rosters found'));
                       }
+
+                      // Create a list of all display names for the dropdown
+                      final allDisplayNames = <String>[];
+
+                      // Add the display names from the unfiltered data
+                      allRosterLeaguesAsync.value?.forEach((roster) {
+                        if (!allDisplayNames.contains(roster.displayName)) {
+                          allDisplayNames.add(roster.displayName);
+                        }
+                      });
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (combined.rosterMap.isNotEmpty)
+                          if (filteredRosters.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
                               child: DropdownMenu<String>(
-                                initialSelection: selectedUser,
-                                onSelected: (String? newValue) {
-                                  setState(() {
-                                    selectedUser = newValue;
-                                  });
-                                },
-                             dropdownMenuEntries:[
-                                DropdownMenuEntry(value: 'None', label: 'None'),
-                                ...combined.rosterMap.entries.map((entry) {
-                                  final rosterId = entry.key;
-                                  final userName = entry.value.displayName;
+                                  initialSelection: selectedUser,
+                                  onSelected: (String? newValue) {
+                                    setState(() {
+                                      selectedUser = newValue;
+                                      ref
+                                          .read(filterUserIdProvider.notifier)
+                                          .state = newValue ==
+                                              'None'
+                                          ? null
+                                          : newValue;
+                                    });
+                                  },
+                                  dropdownMenuEntries: [
+                                    DropdownMenuEntry(
+                                        value: 'None', label: 'None'),
+                                    ...allDisplayNames.map((username) {
+                                      final rosterId = username;
+                                      final userName = username;
 
-                                  return DropdownMenuEntry<String>(
-                                    value: rosterId.toString(),
-                                    label: userName,
-                                  );
-                                }).toList(),]
-                              ),
+                                      return DropdownMenuEntry<String>(
+                                        value: username,
+                                        label: username,
+                                      );
+                                    }),
+                                  ]),
                             ),
                           Expanded(
                             child: ListView.builder(
-                              itemCount: combined.rosters.length,
+                              itemCount: filteredRosters.length,
                               itemBuilder: (context, index) {
                                 // Get the roster ID from the map keys
-                                final roster = combined.rosters[index];
+                                final roster = filteredRosters[index];
                                 return Card(
                                   margin:
                                       const EdgeInsets.symmetric(vertical: 4),
@@ -137,9 +160,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text("Owner: ${roster.displayName}"),
-                                        if (roster.deathPlayers != null)
+                                        if (roster.deathPoints != null)
                                           Text(
-                                              "Players: ${roster.deathPlayers}"),
+                                              "Death Week: ${roster.deathWeek}"),
                                         if (roster.weeks.isNotEmpty) ...[
                                           const SizedBox(height: 8),
                                           const Text("Weekly Points:",
@@ -153,19 +176,18 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                               children: [
                                                 SizedBox(
                                                     height: (roster.truePoints
-                                                                ?.length ??
-                                                            0) *
+                                                            .length) *
                                                         20.0, // Adjust height based on item count
                                                     child: ListView.builder(
                                                         shrinkWrap: true,
                                                         physics:
                                                             const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
                                                         itemCount: roster
-                                                            .truePoints?.length,
+                                                            .truePoints.length,
                                                         itemBuilder:
                                                             (context, index) {
                                                           return Text(
-                                                              "Week ${index + 1}: ${roster.truePoints?[index]}");
+                                                              "Week ${index + 1}: ${roster.truePoints[index]}");
                                                         }))
                                               ]),
                                         ],
@@ -177,6 +199,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                               },
                             ),
                           ),
+                          
                         ],
                       );
                     },

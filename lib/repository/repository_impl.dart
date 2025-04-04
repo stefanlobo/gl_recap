@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:guillotine_recap/app/convert.dart';
-import 'package:guillotine_recap/model/combined.dart';
 import 'package:guillotine_recap/model/matchup_week.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/model/league.dart';

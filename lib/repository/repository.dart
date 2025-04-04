@@ -1,5 +1,4 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:guillotine_recap/model/combined.dart';
 import 'package:guillotine_recap/model/league.dart';
 import 'package:guillotine_recap/model/matchup_week.dart';
 import 'package:guillotine_recap/model/roster.dart';
