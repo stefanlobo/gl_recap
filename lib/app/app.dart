@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:guillotine_recap/charts.dart';
 import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/network/api_service.dart';
 import 'package:guillotine_recap/provider/provider.dart';
@@ -199,7 +200,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                               },
                             ),
                           ),
-                          
+                          Expanded(
+                              child: PointsPerWeekGraph(
+                                  filteredRosters: filteredRosters))
                         ],
                       );
                     },
