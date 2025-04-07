@@ -5,104 +5,279 @@ import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'dart:math';
 
-class PointsPerWeekGraph extends StatelessWidget {
+class PointsPerWeekGraph extends StatefulWidget {
   final List<RosterLeague> filteredRosters;
 
-  const PointsPerWeekGraph({required this.filteredRosters, Key? key})
-      : super(key: key);
+  const PointsPerWeekGraph({
+    Key? key,
+    required this.filteredRosters,
+  }) : super(key: key);
+
+  @override
+  State<PointsPerWeekGraph> createState() => _PointsPerWeekGraph();
+}
+
+class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
+  late bool isShowingPointData = true;
+  double reservedSize = 42;
+
+  final colors = [
+    Colors.blue,
+    Colors.red,
+    Colors.amber,
+    Colors.green,
+    Colors.purple,
+    Colors.orange,
+    Colors.teal,
+    Colors.amber,
+    Colors.pink,
+    Colors.indigo,
+    Colors.lime,
+    Colors.brown,
+    Colors.cyan,
+    Colors.lightGreen,
+    Colors.lightBlue,
+    Colors.deepOrange,
+    Colors.black,
+    Colors.blueGrey,
+    Colors.cyanAccent,
+    Colors.deepPurpleAccent
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: AspectRatio(
-            aspectRatio: 1.5,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: LineChart(
-                LineChartData(
-                    gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        horizontalInterval: 10),
-                    titlesData: FlTitlesData(
-                      show: true,
-                      rightTitles:
-                          AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles:
-                          AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 30,
-                        interval: 1,
-                        getTitlesWidget: (value, meta) {
-                          return SideTitleWidget(
-                            child: Text(
-                              'W${value.toInt()}',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            meta: meta,
-                          );
-                        },
-                      )),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          minIncluded: false,
-                          maxIncluded: false,
-                          showTitles: true,
-                          interval: 10,
-                          reservedSize: 50,
-                        ),
-                      ),
-                    ),
-                    borderData: FlBorderData(
-                        show: true,
-                        border: Border.all(color: const Color(0xff37434d))),
-                    minX: 1,
-                    maxX: getMaxWeek(),
-                    minY: getMinPoints(),
-                    maxY: getMaxPoints(),
-                    lineBarsData: getLineBarsData()),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text(
+                isShowingPointData ? "Points Per Week" : "Standings Per Week",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  isShowingPointData = !isShowingPointData;
+                });
+              },
+              icon: Icon(
+                Icons.swap_vert,
+                color: Colors.blue,
+                size: 28,
+              ),
+              tooltip:
+                  "Switch to ${isShowingPointData ? 'Standings' : 'Points'} View",
+            ),
+          ],
+        ),
+        // Main content row with chart and legend
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Chart
+              Expanded(
+                flex: 3,
+                child: AspectRatio(
+                  aspectRatio: 1.5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LineChart(
+                      isShowingPointData ? pointData : standingData,
+                      duration: const Duration(milliseconds: 500),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Legend
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: buildLegend(colors),
+              ),
+            ],
           ),
         ),
-        buildLegend(),
       ],
     );
   }
 
-  List<LineChartBarData> getLineBarsData() {
+  LineChartData get pointData => LineChartData(
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+              return touchedSpots.map((spot) {
+                final rosterIndex = spot.barIndex;
+                final roster = widget.filteredRosters[rosterIndex];
+                final rosterName =
+                    roster.displayName ?? 'Roster ${rosterIndex + 1}';
+                final color = colors[rosterIndex % colors.length];
+
+                return LineTooltipItem(
+                  textAlign: TextAlign.left,
+                  '${spot.y.toStringAsFixed(2)} - $rosterName',
+                  TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    //overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ),
+        gridData: FlGridData(
+            show: true, drawVerticalLine: false, horizontalInterval: 10),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: reservedSize,
+            interval: 1,
+            getTitlesWidget: (value, meta) {
+              return SideTitleWidget(
+                child: Text(
+                  'W${value.toInt()}',
+                  style: TextStyle(fontSize: 12),
+                ),
+                meta: meta,
+              );
+            },
+          )),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              minIncluded: false,
+              maxIncluded: false,
+              showTitles: true,
+              interval: 10,
+              reservedSize: reservedSize,
+            ),
+          ),
+        ),
+        borderData: FlBorderData(
+            show: true, border: Border.all(color: const Color(0xff37434d))),
+        minX: 1,
+        maxX: getMaxWeek(),
+        minY: getMinPoints(),
+        maxY: getMaxPoints(),
+        lineBarsData: getLineBarsPointData(colors),
+      );
+
+  LineChartData get standingData => LineChartData(
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+              return touchedSpots.map((spot) {
+                final rosterIndex = spot.barIndex;
+                final roster = widget.filteredRosters[rosterIndex];
+                final rosterName =
+                    roster.displayName ?? 'Roster ${rosterIndex + 1}';
+                final color = colors[rosterIndex % colors.length];
+
+                int flipped = spot.y.toInt();
+                int position = widget.filteredRosters.length - (flipped - 1);
+
+                String positionText = '$position';
+
+                if (position == 1) {
+                  positionText = '1st';
+                } else if (position == 2) {
+                  positionText = '2nd';
+                } else if (position == 3) {
+                  positionText = '3rd';
+                } else {
+                  positionText = '${position}th';
+                }
+
+                return LineTooltipItem(
+                  textAlign: TextAlign.left,
+                  '$positionText - $rosterName',
+                  TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    //overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ),
+        gridData: FlGridData(
+            show: true, drawVerticalLine: false, horizontalInterval: 1),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: reservedSize,
+            interval: 1,
+            getTitlesWidget: (value, meta) {
+              return SideTitleWidget(
+                child: Text(
+                  'W${value.toInt()}',
+                  style: TextStyle(fontSize: 12),
+                ),
+                meta: meta,
+              );
+            },
+          )),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 1,
+              reservedSize: reservedSize,
+              getTitlesWidget: (value, meta) {
+                int flipped = value.toInt();
+                int position = widget.filteredRosters.length - (flipped - 1);
+                String positionText = '$position';
+
+                if (position == 1) {
+                  positionText += 'st';
+                } else if (position == 2) {
+                  positionText += 'nd';
+                } else if (position == 3) {
+                  positionText += 'rd';
+                } else {
+                  positionText += 'th';
+                }
+
+                return SideTitleWidget(
+                    child: Text(
+                      positionText,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    meta: meta);
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(
+            show: true, border: Border.all(color: const Color(0xff37434d))),
+        minX: 1,
+        maxX: getMaxWeek(),
+        minY: 1,
+        maxY: widget.filteredRosters.length.toDouble(),
+        lineBarsData: getLineBarsStandingData(colors),
+      );
+
+  List<LineChartBarData> getLineBarsPointData(List<Color> colors) {
     List<LineChartBarData> lines = [];
 
-    final colors = [
-      Colors.blue,
-      Colors.red,
-      Colors.amber,
-      Colors.green,
-      Colors.purple,
-      Colors.orange,
-      Colors.teal,
-      Colors.amber,
-      Colors.pink,
-      Colors.indigo,
-      Colors.lime,
-      Colors.brown,
-      Colors.cyan,
-      Colors.lightGreen,
-      Colors.lightBlue,
-      Colors.deepOrange,
-      Colors.black,
-      Colors.blueGrey,
-      Colors.cyanAccent,
-      Colors.deepPurpleAccent
-    ];
-
     // Create a line for each roster
-    for (int i = 0; i < filteredRosters.length; i++) {
-      final roster = filteredRosters[i];
+    for (int i = 0; i < widget.filteredRosters.length; i++) {
+      final roster = widget.filteredRosters[i];
       final color = colors[i];
 
       List<FlSpot> spots = [];
@@ -131,15 +306,104 @@ class PointsPerWeekGraph extends StatelessWidget {
     return lines;
   }
 
+  List<LineChartBarData> getLineBarsStandingData(List<Color> colors) {
+    List<LineChartBarData> lines = [];
+
+    // Find the weekly standings for each week
+    Map<int, List<Map<String, dynamic>>> weeklyStandings = {};
+
+    for (int week = 0; week < getMaxWeek().toInt(); week++) {
+      weeklyStandings[week + 1] = [];
+
+      for (int i = 0; i < widget.filteredRosters.length; i++) {
+        final roster = widget.filteredRosters[i];
+        double points = 0.0;
+
+        if (week < roster.truePoints.length) {
+          points = roster.truePoints[week];
+        }
+
+        weeklyStandings[week + 1]!.add({
+          "rosterIndex": i,
+          "roster": roster,
+          "points": points,
+        });
+      }
+
+      // Sort by points (descending) to determine standings
+      weeklyStandings[week + 1]!
+          .sort((a, b) => b['points'].compareTo(a['points']));
+    }
+
+    // Now create a line for each roster showing their standing over time
+    for (int i = 0; i < widget.filteredRosters.length; i++) {
+      final roster = widget.filteredRosters[i];
+      final color = colors[i % colors.length];
+      List<FlSpot> spots = [];
+
+      // Go through each week and find this roster's standing
+      for (int week = 1; week <= getMaxWeek().toInt(); week++) {
+        if (weeklyStandings.containsKey(week)) {
+          final weekData = weeklyStandings[week]!;
+
+          // Find the standing of this roster for this week
+          int standing = 1;
+          for (int j = 0; j < weekData.length; j++) {
+            if (weekData[j]['rosterIndex'] == i) {
+              standing =
+                  j + 1; // +1 because index starts at 0, standings start at 1
+              break;
+            }
+          }
+
+          // Only add if there was actual data for this week
+          if (weekData
+              .any((item) => item['rosterIndex'] == i && item['points'] > 0)) {
+            final flippedStanding =
+                widget.filteredRosters.length - (standing - 1);
+            spots.add(FlSpot(week.toDouble(), flippedStanding.toDouble()));
+          }
+        }
+      }
+      spots.sort((a, b) => a.x.compareTo(b.x));
+
+      if (spots.isNotEmpty) {
+        lines.add(
+          LineChartBarData(
+            isCurved: false,
+            color: color,
+            barWidth: 3,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) {
+                return FlDotCirclePainter(
+                  radius: 4,
+                  color: color,
+                  strokeWidth: 2,
+                  strokeColor: Colors.white,
+                );
+              },
+            ),
+            belowBarData: BarAreaData(show: false),
+            spots: spots,
+          ),
+        );
+      }
+    }
+
+    return lines;
+  }
+
   double getMaxWeek() {
-    double maxWeek = filteredRosters.first.truePoints.length.toDouble();
+    double maxWeek = widget.filteredRosters.first.truePoints.length.toDouble();
     return maxWeek;
   }
 
   double getMaxPoints() {
     double maxPoints = 0;
 
-    for (final roster in filteredRosters) {
+    for (final roster in widget.filteredRosters) {
       final maxInRoster =
           roster.truePoints.isNotEmpty ? roster.truePoints.reduce(max) : 0.0;
       maxPoints = max(maxPoints, maxInRoster);
@@ -151,7 +415,7 @@ class PointsPerWeekGraph extends StatelessWidget {
   double getMinPoints() {
     double minPoints = double.infinity;
 
-    for (final roster in filteredRosters) {
+    for (final roster in widget.filteredRosters) {
       // Filter out zeros and empty lists
       final nonZeroPoints =
           roster.truePoints.where((point) => point > 0).toList();
@@ -167,30 +431,8 @@ class PointsPerWeekGraph extends StatelessWidget {
   }
 
   // Build a legend widget showing roster names and their corresponding colors
-  Widget buildLegend() {
+  Widget buildLegend(List<Color> colors) {
     // Array of colors for different lines - same as in getLineBarsData
-    final colors = [
-      Colors.blue,
-      Colors.red,
-      Colors.amber,
-      Colors.green,
-      Colors.purple,
-      Colors.orange,
-      Colors.teal,
-      Colors.amber,
-      Colors.pink,
-      Colors.indigo,
-      Colors.lime,
-      Colors.brown,
-      Colors.cyan,
-      Colors.lightGreen,
-      Colors.lightBlue,
-      Colors.deepOrange,
-      Colors.black,
-      Colors.blueGrey,
-      Colors.cyanAccent,
-      Colors.deepPurpleAccent
-    ];
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -207,10 +449,10 @@ class PointsPerWeekGraph extends StatelessWidget {
           runSpacing: 8.0,
           alignment: WrapAlignment.center,
           children: List.generate(
-            filteredRosters.length,
+            widget.filteredRosters.length,
             (index) {
               final color = colors[index % colors.length];
-              final roster = filteredRosters[index];
+              final roster = widget.filteredRosters[index];
 
               // Get roster name - adjust this based on your data structure
               final rosterName = roster.displayName ?? 'Roster ${index + 1}';
