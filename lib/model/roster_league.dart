@@ -13,17 +13,13 @@ class RosterLeague {
   late final List<String>? deathStarters;
   late final List<String>? deathPlayers;
   late final double? deathPoints;
+  late final deathWeek;
 
   // Weeks data
   // week # : Matchup Info (points, players, etc)
   final Map<int, MatchupWeek> weeks;
 
   int get weeksLength => weeks.length;
-
-  int get deathWeek {
-    int index = truePoints.indexWhere((value) => value == 0.0);
-    return index != -1 ? index : truePoints.length - 1; //Returns the death week
-  }
 
   RosterLeague({
     required this.userId,
@@ -32,7 +28,6 @@ class RosterLeague {
     this.avatar = '',
     required this.weeks,
   });
-
 }
 
 class RosterLeagueCalculator {
@@ -50,6 +45,7 @@ class RosterLeagueCalculator {
     final rosterDeathWeeks = <int, int>{};
 
     for (final week in allWeeks) {
+      print(week);
       double lowestScore = double.infinity;
       int lowestScoreRosterId = -1;
       for (final roster in allRosterLeagues) {
@@ -65,11 +61,16 @@ class RosterLeagueCalculator {
         }
       }
 
+      print(lowestScoreRosterId);
+
       if (lowestScoreRosterId != -1) {
         deadRosters.add(lowestScoreRosterId);
         rosterDeathWeeks[lowestScoreRosterId] = week;
       }
     }
+
+    print(rosterDeathWeeks);
+    print(deadRosters);
 
     for (final roster in allRosterLeagues) {
       roster.truePoints = [];
@@ -77,15 +78,19 @@ class RosterLeagueCalculator {
       // check if dead
       final isDead = deadRosters.contains(roster.rosterId);
 
-      final deathWeek = deadRosters.contains(roster.rosterId)
-          ? rosterDeathWeeks[roster.rosterId]
-          : 100;
+      final deathWeek = isDead ? rosterDeathWeeks[roster.rosterId] : 100;
+
+      print(roster.displayName);
+      print(roster.rosterId);
+      print(deathWeek);
 
       for (final week in allWeeks) {
         final weekScore = roster.weeks[week]?.points ?? 0.0;
         roster.truePoints
             .add((!isDead || week <= deathWeek!) ? weekScore : 0.0);
       }
+
+      roster.deathWeek = isDead ? deathWeek : null;
 
       roster.deathPlayers = deathWeek != null
           ? roster.weeks[deathWeek]?.players

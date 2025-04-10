@@ -8,6 +8,7 @@ import 'package:guillotine_recap/repository/repository_impl.dart';
 import 'package:guillotine_recap/repository/repository.dart';
 import 'package:guillotine_recap/screen/home_screen.dart';
 import 'package:guillotine_recap/app/di.dart';
+import 'package:guillotine_recap/standings.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -116,35 +117,36 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (filteredRosters.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: DropdownMenu<String>(
-                                  initialSelection: selectedUser,
-                                  onSelected: (String? newValue) {
-                                    setState(() {
-                                      selectedUser = newValue;
-                                      ref
-                                          .read(filterUserIdProvider.notifier)
-                                          .state = newValue ==
-                                              'None'
-                                          ? null
-                                          : newValue;
-                                    });
-                                  },
-                                  dropdownMenuEntries: [
-                                    DropdownMenuEntry(
-                                        value: 'None', label: 'None'),
-                                    ...allDisplayNames.map((username) {
-                                      final rosterId = username;
-                                      final userName = username;
+                            Expanded(
+                                child: Standings(
+                                    filteredRosters: filteredRosters)),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: DropdownMenu<String>(
+                                initialSelection: selectedUser,
+                                onSelected: (String? newValue) {
+                                  setState(() {
+                                    selectedUser = newValue;
+                                    ref
+                                            .read(filterUserIdProvider.notifier)
+                                            .state =
+                                        newValue == 'None' ? null : newValue;
+                                  });
+                                },
+                                dropdownMenuEntries: [
+                                  DropdownMenuEntry(
+                                      value: 'None', label: 'None'),
+                                  ...allDisplayNames.map((username) {
+                                    final rosterId = username;
+                                    final userName = username;
 
-                                      return DropdownMenuEntry<String>(
-                                        value: username,
-                                        label: username,
-                                      );
-                                    }),
-                                  ]),
-                            ),
+                                    return DropdownMenuEntry<String>(
+                                      value: username,
+                                      label: username,
+                                    );
+                                  }),
+                                ]),
+                          ),
                           Expanded(
                             child: ListView.builder(
                               itemCount: filteredRosters.length,
