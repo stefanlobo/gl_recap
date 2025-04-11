@@ -18,15 +18,40 @@ class Standings extends StatefulWidget {
 
 class _StandingsState extends State<Standings> {
   bool _isSortAcc = true;
+  List<RosterLeague> _sortedRosters = [];
 
   ScrollController _horizontalController = ScrollController();
   ScrollController _verticalController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _updateSortedRosters();
+  }
+
+  @override
+  void didUpdateWidget(Standings oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filteredRosters != oldWidget.filteredRosters) {
+      _updateSortedRosters();
+    }
+  }
 
   @override
   void dispose() {
     _horizontalController.dispose();
     _verticalController.dispose();
     super.dispose();
+  }
+
+  void _updateSortedRosters() {
+    // Create a new list (don't modify the original)
+    _sortedRosters = List.from(widget.filteredRosters);
+    _isSortAcc = true;
+    sortDeathWeek();
+    // Apply current sorting if needed
+    // You could maintain the current sort column and direction
+    // and reapply the same sort when this happens
   }
 
   @override
@@ -74,25 +99,7 @@ class _StandingsState extends State<Standings> {
       DataColumn(
         label: Text("Death Week"),
         onSort: (columnIndex, ascending) {
-          setState(() {
-            if (_isSortAcc) {
-              widget.filteredRosters.sort((a, b) {
-                if (a.deathWeek == null && b.deathWeek == null) return 0;
-                if (a.deathWeek == null) return -1; // a is "greater"
-                if (b.deathWeek == null) return 1; // b is "greater"
-                return b.deathWeek!.compareTo(a.deathWeek!); // both non-null
-              });
-            } else {
-              widget.filteredRosters.sort((a, b) {
-                if (a.deathWeek == null && b.deathWeek == null) return 0;
-                if (a.deathWeek == null) return 1; // a is "greater"
-                if (b.deathWeek == null) return -1; // b is "greater"
-                return a.deathWeek!.compareTo(b.deathWeek!); // both non-null
-              });
-            }
-
-            _isSortAcc = !_isSortAcc;
-          });
+          sortDeathWeek();
         },
       ),
       DataColumn(
@@ -100,7 +107,7 @@ class _StandingsState extends State<Standings> {
         onSort: (columnIndex, ascending) {
           setState(() {
             if (_isSortAcc) {
-              widget.filteredRosters.sort((a, b) {
+              _sortedRosters.sort((a, b) {
                 if (a.deathPoints == null && b.deathPoints == null) return 0;
                 if (a.deathPoints == null) return -1; // a is "greater"
                 if (b.deathPoints == null) return 1; // b is "greater"
@@ -108,7 +115,7 @@ class _StandingsState extends State<Standings> {
                     .compareTo(a.deathPoints!); // both non-null
               });
             } else {
-              widget.filteredRosters.sort((a, b) {
+              _sortedRosters.sort((a, b) {
                 if (a.deathPoints == null && b.deathPoints == null) return 0;
                 if (a.deathPoints == null) return 1; // a is "greater"
                 if (b.deathPoints == null) return -1; // b is "greater"
@@ -126,13 +133,13 @@ class _StandingsState extends State<Standings> {
         onSort: (columnIndex, ascending) {
           setState(() {
             if (_isSortAcc) {
-              widget.filteredRosters.sort((a, b) {
+              _sortedRosters.sort((a, b) {
                 final a_tp = a.truePoints.reduce((a, b) => a + b);
                 final b_tp = b.truePoints.reduce((a, b) => a + b);
                 return b_tp.compareTo(a_tp); // both non-null
               });
             } else {
-              widget.filteredRosters.sort((a, b) {
+              _sortedRosters.sort((a, b) {
                 final a_tp = a.truePoints.reduce((a, b) => a + b);
                 final b_tp = b.truePoints.reduce((a, b) => a + b);
                 return a_tp.compareTo(b_tp); // both non-null
@@ -152,8 +159,30 @@ class _StandingsState extends State<Standings> {
     return roster.deathWeek == null;
   }
 
+  void sortDeathWeek() {
+    setState(() {
+      if (_isSortAcc) {
+        _sortedRosters.sort((a, b) {
+          if (a.deathWeek == null && b.deathWeek == null) return 0;
+          if (a.deathWeek == null) return -1; // a is "greater"
+          if (b.deathWeek == null) return 1; // b is "greater"
+          return b.deathWeek!.compareTo(a.deathWeek!); // both non-null
+        });
+      } else {
+        _sortedRosters.sort((a, b) {
+          if (a.deathWeek == null && b.deathWeek == null) return 0;
+          if (a.deathWeek == null) return 1; // a is "greater"
+          if (b.deathWeek == null) return -1; // b is "greater"
+          return a.deathWeek!.compareTo(b.deathWeek!); // both non-null
+        });
+      }
+
+      _isSortAcc = !_isSortAcc;
+    });
+  }
+
   List<DataRow> _createRows() {
-    return widget.filteredRosters.map((e) {
+    return _sortedRosters.map((e) {
       bool winner = isWinner(e);
       return DataRow(cells: [
         DataCell(Text(e.displayName)),

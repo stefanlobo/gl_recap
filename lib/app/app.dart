@@ -117,91 +117,93 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (filteredRosters.isNotEmpty)
-                            Expanded(
-                                child: Standings(
-                                    filteredRosters: filteredRosters)),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: DropdownMenu<String>(
-                                initialSelection: selectedUser,
-                                onSelected: (String? newValue) {
-                                  setState(() {
-                                    selectedUser = newValue;
-                                    ref
-                                            .read(filterUserIdProvider.notifier)
-                                            .state =
-                                        newValue == 'None' ? null : newValue;
-                                  });
-                                },
-                                dropdownMenuEntries: [
-                                  DropdownMenuEntry(
-                                      value: 'None', label: 'None'),
-                                  ...allDisplayNames.map((username) {
-                                    final rosterId = username;
-                                    final userName = username;
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: DropdownMenu<String>(
+                                  initialSelection: selectedUser,
+                                  onSelected: (String? newValue) {
+                                    setState(() {
+                                      selectedUser = newValue;
+                                      ref
+                                          .read(filterUserIdProvider.notifier)
+                                          .state = newValue ==
+                                              'None'
+                                          ? null
+                                          : newValue;
+                                    });
+                                  },
+                                  dropdownMenuEntries: [
+                                    DropdownMenuEntry(
+                                        value: 'None', label: 'None'),
+                                    ...allDisplayNames.map((username) {
+                                      final rosterId = username;
+                                      final userName = username;
 
-                                    return DropdownMenuEntry<String>(
-                                      value: username,
-                                      label: username,
-                                    );
-                                  }),
-                                ]),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: filteredRosters.length,
-                              itemBuilder: (context, index) {
-                                // Get the roster ID from the map keys
-                                final roster = filteredRosters[index];
-                                return Card(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 4),
-                                  child: ListTile(
-                                    title: Text("Roster ${roster.rosterId}"),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text("Owner: ${roster.displayName}"),
-                                        if (roster.deathPoints != null)
-                                          Text(
-                                              "Death Week: ${roster.deathWeek}"),
-                                        if (roster.weeks.isNotEmpty) ...[
-                                          const SizedBox(height: 8),
-                                          const Text("Weekly Points:",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold)),
-
-                                          // Display points for each week
-                                          Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                    height: (roster.truePoints
-                                                            .length) *
-                                                        20.0, // Adjust height based on item count
-                                                    child: ListView.builder(
-                                                        shrinkWrap: true,
-                                                        physics:
-                                                            const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
-                                                        itemCount: roster
-                                                            .truePoints.length,
-                                                        itemBuilder:
-                                                            (context, index) {
-                                                          return Text(
-                                                              "Week ${index + 1}: ${roster.truePoints[index]}");
-                                                        }))
-                                              ]),
-                                        ],
-                                      ],
-                                    ),
-                                    trailing: const Icon(Icons.cabin),
-                                  ),
-                                );
-                              },
+                                      return DropdownMenuEntry<String>(
+                                        value: username,
+                                        label: username,
+                                      );
+                                    }),
+                                  ]),
                             ),
-                          ),
+                          Expanded(
+                              child:
+                                  Standings(filteredRosters: filteredRosters)),
+                          // Expanded(
+                          //   child: ListView.builder(
+                          //     itemCount: filteredRosters.length,
+                          //     itemBuilder: (context, index) {
+                          //       // Get the roster ID from the map keys
+                          //       final roster = filteredRosters[index];
+                          //       return Card(
+                          //         margin:
+                          //             const EdgeInsets.symmetric(vertical: 4),
+                          //         child: ListTile(
+                          //           title: Text("Roster ${roster.rosterId}"),
+                          //           subtitle: Column(
+                          //             crossAxisAlignment:
+                          //                 CrossAxisAlignment.start,
+                          //             children: [
+                          //               Text("Owner: ${roster.displayName}"),
+                          //               if (roster.deathPoints != null)
+                          //                 Text(
+                          //                     "Death Week: ${roster.deathWeek}"),
+                          //               if (roster.weeks.isNotEmpty) ...[
+                          //                 const SizedBox(height: 8),
+                          //                 const Text("Weekly Points:",
+                          //                     style: TextStyle(
+                          //                         fontWeight: FontWeight.bold)),
+
+                          //                 // Display points for each week
+                          //                 Column(
+                          //                     crossAxisAlignment:
+                          //                         CrossAxisAlignment.start,
+                          //                     children: [
+                          //                       SizedBox(
+                          //                           height: (roster.truePoints
+                          //                                   .length) *
+                          //                               20.0, // Adjust height based on item count
+                          //                           child: ListView.builder(
+                          //                               shrinkWrap: true,
+                          //                               physics:
+                          //                                   const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
+                          //                               itemCount: roster
+                          //                                   .truePoints.length,
+                          //                               itemBuilder:
+                          //                                   (context, index) {
+                          //                                 return Text(
+                          //                                     "Week ${index + 1}: ${roster.truePoints[index]}");
+                          //                               }))
+                          //                     ]),
+                          //               ],
+                          //             ],
+                          //           ),
+                          //           trailing: const Icon(Icons.cabin),
+                          //         ),
+                          //       );
+                          //     },
+                          //   ),
+                          // ),
                           Expanded(
                               child: PointsPerWeekGraph(
                                   filteredRosters: filteredRosters))
