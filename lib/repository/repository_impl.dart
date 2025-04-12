@@ -75,8 +75,7 @@ class SleeperRepositoryImpl implements SleeperRepository {
   @override
   Future<League> getLeague({required String leagueId}) async {
     try {
-      final response =
-          await _apiService.get(endPoint: "league/$leagueId/rosters");
+      final response = await _apiService.get(endPoint: "league/$leagueId");
 
       if (response.data == null ||
           (response.data is List && response.data.isEmpty)) {

@@ -49,9 +49,6 @@ class _StandingsState extends State<Standings> {
     _sortedRosters = List.from(widget.filteredRosters);
     _isSortAcc = true;
     sortDeathWeek();
-    // Apply current sorting if needed
-    // You could maintain the current sort column and direction
-    // and reapply the same sort when this happens
   }
 
   @override

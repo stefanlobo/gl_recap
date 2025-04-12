@@ -43,11 +43,11 @@ final rosterProvider = FutureProvider.autoDispose<List<Roster>>((ref) async {
 final usersProvider = FutureProvider.autoDispose<List<User>>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
 
-  final rosters = await ref
+  final users = await ref
       .watch(sleeperRepositoryProvider)
       .getUsers(leagueId: leagueNumber);
 
-  return rosters;
+  return users;
 });
 
 final weeksProvider =
@@ -107,7 +107,7 @@ final combinedRosterProvider = FutureProvider.autoDispose<List<RosterLeague>>(
 );
 
 final filteredRosterLeaguesProvider = Provider.autoDispose<List<RosterLeague>>((ref) {
-  
+
   // Get the unfiltered data
   final allRosterLeaguesAsync = ref.watch(combinedRosterProvider);
   // Get the filter
