@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:guillotine_recap/charts.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'dart:core';
 import 'dart:math';
+
+import 'package:guillotine_recap/widgets/standings_card.dart';
 
 class Standings extends StatefulWidget {
   final List<RosterLeague> filteredRosters;
@@ -20,7 +23,6 @@ class _StandingsState extends State<Standings> {
   bool _isSortAcc = true;
   List<RosterLeague> _sortedRosters = [];
 
-  ScrollController _horizontalController = ScrollController();
   ScrollController _verticalController = ScrollController();
 
   @override
@@ -39,7 +41,6 @@ class _StandingsState extends State<Standings> {
 
   @override
   void dispose() {
-    _horizontalController.dispose();
     _verticalController.dispose();
     super.dispose();
   }
@@ -56,36 +57,24 @@ class _StandingsState extends State<Standings> {
     // Get the screen width to help with sizing
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Center(
-      child: Column(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Container(
-                  // Set a minimum width to ensure the table takes up more space
-                  width: screenWidth * 0.95, // 95% of screen width
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columns: _createColumn(),
-                      rows: _createRows(),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      // Set minimum column width to distribute space better
-                      columnSpacing: screenWidth * 0.15, // 5% of screen width
-                      horizontalMargin: 16,
-                    ),
-                  ),
-                ),
-              ),
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: min(screenWidth * 0.95,
+                  1200), // Constrain max width, use min to avoid overflows
             ),
-          ),
-        ],
+            child: Column(
+              mainAxisSize:
+                  MainAxisSize.min, 
+              children: [
+                StandingsCard(
+                    columns: _createColumn(), rows: _createRows()),
+                PointsPerWeekGraph(
+                  filteredRosters: _sortedRosters,
+                ),
+              ],
+            )),
       ),
     );
   }

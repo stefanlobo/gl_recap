@@ -18,8 +18,10 @@ class PointsPerWeekGraph extends StatefulWidget {
 }
 
 class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
+  int? selectedLineIndex; // null when no line is selected
+
   late bool isShowingPointData = true;
-  double reservedSize = 42;
+  double reservedSize = 60;
 
   final colors = [
     Colors.blue,
@@ -46,66 +48,69 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Text(
-                isShowingPointData ? "Points Per Week" : "Standings Per Week",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  isShowingPointData = !isShowingPointData;
-                });
-              },
-              icon: Icon(
-                Icons.swap_vert,
-                color: Colors.blue,
-                size: 28,
-              ),
-              tooltip:
-                  "Switch to ${isShowingPointData ? 'Standings' : 'Points'} View",
-            ),
-          ],
-        ),
-        // Main content row with chart and legend
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Chart
-              Expanded(
-                flex: 3,
-                child: AspectRatio(
-                  aspectRatio: 1.5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LineChart(
-                      isShowingPointData ? pointData : standingData,
-                      duration: const Duration(milliseconds: 500),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: Text(
+                    isShowingPointData
+                        ? "Points Per Week"
+                        : "Standings Per Week",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
                 ),
-              ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isShowingPointData = !isShowingPointData;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.swap_vert,
+                    color: Colors.blue,
+                    size: 28,
+                  ),
+                  tooltip:
+                      "Switch to ${isShowingPointData ? 'Standings' : 'Points'} View",
+                ),
+              ],
+            ),
+            // Main content row with chart and legend
+            SizedBox(
+              height: 600,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Chart
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: LineChart(
+                        isShowingPointData ? pointData : standingData,
+                        duration: const Duration(milliseconds: 500),
+                      ),
+                    ),
+                  ),
 
-              // Legend
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: buildLegend(colors),
+                  // Legend
+                  buildLegend(colors),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -159,7 +164,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
               minIncluded: false,
               maxIncluded: false,
               showTitles: true,
-              interval: 10,
+              //interval: 1,
               reservedSize: reservedSize,
             ),
           ),
@@ -444,9 +449,9 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
           border: Border.all(color: Colors.grey.shade300),
         ),
         child: Wrap(
-          direction: Axis.vertical,
-          spacing: 12.0,
-          runSpacing: 8.0,
+          direction: Axis.horizontal,
+          spacing: 8.0,
+          runSpacing: 4.0,
           alignment: WrapAlignment.center,
           children: List.generate(
             widget.filteredRosters.length,
