@@ -17,7 +17,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 final leagueNumberProvider = StateProvider<String>((ref) {
-  return '1124849636478046208';
+  return '1124823008221884416'; // Other league to try : 1124823008221884416, 1124849636478046208
 });
 
 final leagueProvider = FutureProvider.autoDispose<League>((ref) async {
@@ -32,7 +32,6 @@ final leagueProvider = FutureProvider.autoDispose<League>((ref) async {
 
 final rosterProvider = FutureProvider.autoDispose<List<Roster>>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
-
   final rosters = await ref
       .watch(sleeperRepositoryProvider)
       .getRoster(leagueId: leagueNumber);
@@ -106,13 +105,13 @@ final combinedRosterProvider = FutureProvider.autoDispose<List<RosterLeague>>(
   },
 );
 
-final filteredRosterLeaguesProvider = Provider.autoDispose<List<RosterLeague>>((ref) {
-
+final filteredRosterLeaguesProvider =
+    Provider.autoDispose<List<RosterLeague>>((ref) {
   // Get the unfiltered data
   final allRosterLeaguesAsync = ref.watch(combinedRosterProvider);
   // Get the filter
   final filteredUserName = ref.watch(filterUserIdProvider);
-  
+
   // Return a loading state while waiting for unfiltered data
   return allRosterLeaguesAsync.when(
     loading: () => [],
@@ -120,25 +119,29 @@ final filteredRosterLeaguesProvider = Provider.autoDispose<List<RosterLeague>>((
     data: (allRosterLeagues) {
       // Apply filter if there is one
       final filteredLeagues = filteredUserName != null
-          ? allRosterLeagues.where((rl) => rl.displayName != filteredUserName).toList()
+          ? allRosterLeagues
+              .where((rl) => rl.displayName != filteredUserName)
+              .toList()
           : List<RosterLeague>.from(allRosterLeagues);
-      
+
       // Calculate the stats if we have leagues
       if (filteredLeagues.isNotEmpty) {
         // Create deep copies to avoid modifying the original objects
-        final leagueCopies = filteredLeagues.map((rl) => RosterLeague(
-          userId: rl.userId,
-          displayName: rl.displayName,
-          rosterId: rl.rosterId,
-          avatar: rl.avatar,
-          weeks: Map.from(rl.weeks),
-        )).toList();
-        
+        final leagueCopies = filteredLeagues
+            .map((rl) => RosterLeague(
+                  userId: rl.userId,
+                  displayName: rl.displayName,
+                  rosterId: rl.rosterId,
+                  avatar: rl.avatar,
+                  weeks: Map.from(rl.weeks),
+                ))
+            .toList();
+
         // Calculate stats
         RosterLeagueCalculator.calculateAllRosterStats(leagueCopies);
         return leagueCopies;
       }
-      
+
       return [];
     },
   );

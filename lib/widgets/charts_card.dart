@@ -5,6 +5,8 @@ import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'dart:math';
 
+import 'package:guillotine_recap/screen/standings_screen.dart';
+
 class PointsPerWeekGraph extends StatefulWidget {
   final List<RosterLeague> filteredRosters;
 
@@ -18,9 +20,28 @@ class PointsPerWeekGraph extends StatefulWidget {
 }
 
 class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
-  int? selectedLineIndex; // null when no line is selected
+  int? selectedLineIndex; // null when no line is selected\
+  List<RosterLeague> finalRoster = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    finalRoster = List.from(widget.filteredRosters);
+    finalRoster.sort((a, b) => a.rosterId.compareTo(b.rosterId));
+  }
+
+  @override
+  void didUpdateWidget(PointsPerWeekGraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filteredRosters != oldWidget.filteredRosters) {
+      finalRoster = List.from(widget.filteredRosters);
+      finalRoster.sort((a, b) => a.rosterId.compareTo(b.rosterId));
+    }
+  }
 
   late bool isShowingPointData = true;
+  bool isViewChanging = false;
   double reservedSize = 60;
 
   final colors = [
@@ -31,7 +52,6 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     Colors.purple,
     Colors.orange,
     Colors.teal,
-    Colors.amber,
     Colors.pink,
     Colors.indigo,
     Colors.lime,
@@ -42,8 +62,9 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     Colors.deepOrange,
     Colors.black,
     Colors.blueGrey,
-    Colors.cyanAccent,
-    Colors.deepPurpleAccent
+    Colors.deepPurple,
+    Colors.yellow,
+    Colors.grey,
   ];
 
   @override
@@ -72,7 +93,17 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                 IconButton(
                   onPressed: () {
                     setState(() {
+                      isViewChanging = true;
                       isShowingPointData = !isShowingPointData;
+                    });
+
+                    // Reset the view changing flag after animation completes
+                    Future.delayed(Duration(milliseconds: 500), () {
+                      if (mounted) {
+                        setState(() {
+                          isViewChanging = false;
+                        });
+                      }
                     });
                   },
                   icon: Icon(
@@ -98,13 +129,15 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                       padding: const EdgeInsets.all(8.0),
                       child: LineChart(
                         isShowingPointData ? pointData : standingData,
-                        duration: const Duration(milliseconds: 500),
+                        duration: isViewChanging
+                            ? const Duration(milliseconds: 500)
+                            : Duration.zero,
                       ),
                     ),
                   ),
 
                   // Legend
-                  buildLegend(colors),
+                  Center(child: buildLegend(colors)),
                 ],
               ),
             ),
@@ -120,7 +153,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
             getTooltipItems: (List<LineBarSpot> touchedSpots) {
               return touchedSpots.map((spot) {
                 final rosterIndex = spot.barIndex;
-                final roster = widget.filteredRosters[rosterIndex];
+                final roster = finalRoster[rosterIndex];
                 final rosterName =
                     roster.displayName ?? 'Roster ${rosterIndex + 1}';
                 final color = colors[rosterIndex % colors.length];
@@ -175,7 +208,8 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
         maxX: getMaxWeek(),
         minY: getMinPoints(),
         maxY: getMaxPoints(),
-        lineBarsData: getLineBarsPointData(colors),
+        lineBarsData:
+            reorderLinesWithSelectionOnTop(getLineBarsPointData(colors)),
       );
 
   LineChartData get standingData => LineChartData(
@@ -184,13 +218,13 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
             getTooltipItems: (List<LineBarSpot> touchedSpots) {
               return touchedSpots.map((spot) {
                 final rosterIndex = spot.barIndex;
-                final roster = widget.filteredRosters[rosterIndex];
+                final roster = finalRoster[rosterIndex];
                 final rosterName =
                     roster.displayName ?? 'Roster ${rosterIndex + 1}';
                 final color = colors[rosterIndex % colors.length];
 
                 int flipped = spot.y.toInt();
-                int position = widget.filteredRosters.length - (flipped - 1);
+                int position = finalRoster.length - (flipped - 1);
 
                 String positionText = '$position';
 
@@ -245,7 +279,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
               reservedSize: reservedSize,
               getTitlesWidget: (value, meta) {
                 int flipped = value.toInt();
-                int position = widget.filteredRosters.length - (flipped - 1);
+                int position = finalRoster.length - (flipped - 1);
                 String positionText = '$position';
 
                 if (position == 1) {
@@ -273,16 +307,19 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
         minX: 1,
         maxX: getMaxWeek(),
         minY: 1,
-        maxY: widget.filteredRosters.length.toDouble(),
-        lineBarsData: getLineBarsStandingData(colors),
+        maxY: finalRoster.length.toDouble(),
+        lineBarsData:
+            reorderLinesWithSelectionOnTop(getLineBarsStandingData(colors)),
       );
 
   List<LineChartBarData> getLineBarsPointData(List<Color> colors) {
     List<LineChartBarData> lines = [];
 
     // Create a line for each roster
-    for (int i = 0; i < widget.filteredRosters.length; i++) {
-      final roster = widget.filteredRosters[i];
+    for (int i = 0; i < finalRoster.length; i++) {
+      bool isSelected = selectedLineIndex == i;
+
+      final roster = finalRoster[i];
       final color = colors[i];
 
       List<FlSpot> spots = [];
@@ -300,12 +337,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
       spots.sort((a, b) => a.x.compareTo(b.x));
 
       // Add this roster's line to the chart
-      lines.add(LineChartBarData(
-          color: color,
-          barWidth: 3,
-          dotData: FlDotData(show: true),
-          belowBarData: BarAreaData(show: false),
-          spots: spots));
+      lines.add(_customLineChartBarData(color, spots, isSelected));
     }
 
     return lines;
@@ -320,8 +352,8 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     for (int week = 0; week < getMaxWeek().toInt(); week++) {
       weeklyStandings[week + 1] = [];
 
-      for (int i = 0; i < widget.filteredRosters.length; i++) {
-        final roster = widget.filteredRosters[i];
+      for (int i = 0; i < finalRoster.length; i++) {
+        final roster = finalRoster[i];
         double points = 0.0;
 
         if (week < roster.truePoints.length) {
@@ -341,8 +373,10 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     }
 
     // Now create a line for each roster showing their standing over time
-    for (int i = 0; i < widget.filteredRosters.length; i++) {
-      final roster = widget.filteredRosters[i];
+    for (int i = 0; i < finalRoster.length; i++) {
+      bool isSelected = selectedLineIndex == i;
+
+      final roster = finalRoster[i];
       final color = colors[i % colors.length];
       List<FlSpot> spots = [];
 
@@ -364,8 +398,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
           // Only add if there was actual data for this week
           if (weekData
               .any((item) => item['rosterIndex'] == i && item['points'] > 0)) {
-            final flippedStanding =
-                widget.filteredRosters.length - (standing - 1);
+            final flippedStanding = finalRoster.length - (standing - 1);
             spots.add(FlSpot(week.toDouble(), flippedStanding.toDouble()));
           }
         }
@@ -373,42 +406,62 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
       spots.sort((a, b) => a.x.compareTo(b.x));
 
       if (spots.isNotEmpty) {
-        lines.add(
-          LineChartBarData(
-            isCurved: false,
-            color: color,
-            barWidth: 3,
-            isStrokeCapRound: true,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, barData, index) {
-                return FlDotCirclePainter(
-                  radius: 4,
-                  color: color,
-                  strokeWidth: 2,
-                  strokeColor: Colors.white,
-                );
-              },
-            ),
-            belowBarData: BarAreaData(show: false),
-            spots: spots,
-          ),
-        );
+        lines.add(_customLineChartBarData(color, spots, isSelected));
       }
     }
 
     return lines;
   }
 
+  List<LineChartBarData> reorderLinesWithSelectionOnTop(
+      List<LineChartBarData> lines) {
+    if (selectedLineIndex == null || selectedLineIndex! >= lines.length) {
+      return lines; // No need to reorder if nothing is selected
+    }
+
+    // Create a new list without modifying the original
+    List<LineChartBarData> reorderedLines = List.from(lines);
+
+    // Remove the selected line
+    final selectedLine = reorderedLines.removeAt(selectedLineIndex!);
+
+    // Add it back at the end so it's drawn last (on top)
+    reorderedLines.add(selectedLine);
+
+    return reorderedLines;
+  }
+
+  LineChartBarData _customLineChartBarData(color, spots, isSelected) {
+    return LineChartBarData(
+      isCurved: false,
+      color: color,
+      barWidth: isSelected ? 4.0 : 2.0,
+      isStrokeCapRound: true,
+      dotData: FlDotData(
+        show: true,
+        getDotPainter: (spot, percent, barData, index) {
+          return FlDotCirclePainter(
+            radius: isSelected ? 8.0 : 3.0, // Larger dots for selected
+            color: color,
+            strokeWidth: isSelected ? 4.0 : 1.0,
+            strokeColor: Colors.white,
+          );
+        },
+      ),
+      belowBarData: BarAreaData(show: false),
+      spots: spots,
+    );
+  }
+
   double getMaxWeek() {
-    double maxWeek = widget.filteredRosters.first.truePoints.length.toDouble();
+    double maxWeek = finalRoster.first.truePoints.length.toDouble();
     return maxWeek;
   }
 
   double getMaxPoints() {
     double maxPoints = 0;
 
-    for (final roster in widget.filteredRosters) {
+    for (final roster in finalRoster) {
       final maxInRoster =
           roster.truePoints.isNotEmpty ? roster.truePoints.reduce(max) : 0.0;
       maxPoints = max(maxPoints, maxInRoster);
@@ -420,7 +473,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
   double getMinPoints() {
     double minPoints = double.infinity;
 
-    for (final roster in widget.filteredRosters) {
+    for (final roster in finalRoster) {
       // Filter out zeros and empty lists
       final nonZeroPoints =
           roster.truePoints.where((point) => point > 0).toList();
@@ -437,53 +490,77 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
 
   // Build a legend widget showing roster names and their corresponding colors
   Widget buildLegend(List<Color> colors) {
-    // Array of colors for different lines - same as in getLineBarsData
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Wrap(
+        direction: Axis.horizontal,
+        spacing: 8.0,
+        runSpacing: 4.0,
+        alignment: WrapAlignment.center,
+        children: List.generate(
+          finalRoster.length,
+          (index) {
+            final color = colors[index % colors.length];
+            final roster = finalRoster[index];
+            final rosterName = roster.displayName ?? 'Roster ${index + 1}';
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Wrap(
-          direction: Axis.horizontal,
-          spacing: 8.0,
-          runSpacing: 4.0,
-          alignment: WrapAlignment.center,
-          children: List.generate(
-            widget.filteredRosters.length,
-            (index) {
-              final color = colors[index % colors.length];
-              final roster = widget.filteredRosters[index];
+            // Check if this is the selected roster
+            final isSelected = selectedLineIndex == index;
 
-              // Get roster name - adjust this based on your data structure
-              final rosterName = roster.displayName ?? 'Roster ${index + 1}';
-
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
+            return GestureDetector(
+              onTap: () {
+                print('Legend item tapped: $index');
+                setState(() {
+                  // Toggle selection - if already selected, clear it, otherwise select this one
+                  if (selectedLineIndex == index) {
+                    selectedLineIndex = null;
+                  } else {
+                    selectedLineIndex = index;
+                  }
+                  print('Selection is now: $selectedLineIndex');
+                });
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                decoration: BoxDecoration(
+                  color:
+                      isSelected ? color.withOpacity(0.2) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                      color: isSelected ? color : Colors.transparent,
+                      width: 1.5),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  Text(
-                    rosterName,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              );
-            },
-          ),
+                    SizedBox(width: 4),
+                    Text(
+                      rosterName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

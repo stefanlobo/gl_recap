@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:guillotine_recap/charts.dart';
+import 'package:guillotine_recap/widgets/charts_card.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'dart:core';
 import 'dart:math';
@@ -62,14 +62,12 @@ class _StandingsState extends State<Standings> {
         child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: min(screenWidth * 0.95,
-                  1200), // Constrain max width, use min to avoid overflows
+                  2000), // Constrain max width, use min to avoid overflows
             ),
             child: Column(
-              mainAxisSize:
-                  MainAxisSize.min, 
+              mainAxisSize: MainAxisSize.min,
               children: [
-                StandingsCard(
-                    columns: _createColumn(), rows: _createRows()),
+                StandingsCard(columns: _createColumn(), rows: _createRows()),
                 PointsPerWeekGraph(
                   filteredRosters: _sortedRosters,
                 ),

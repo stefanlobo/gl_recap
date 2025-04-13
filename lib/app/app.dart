@@ -2,15 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:guillotine_recap/charts.dart';
+import 'package:guillotine_recap/widgets/charts_card.dart';
 import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/network/api_service.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/repository/repository_impl.dart';
 import 'package:guillotine_recap/repository/repository.dart';
-import 'package:guillotine_recap/screen/home_screen.dart';
 import 'package:guillotine_recap/app/di.dart';
-import 'package:guillotine_recap/standings.dart';
+import 'package:guillotine_recap/screen/standings_screen.dart';
 import 'package:guillotine_recap/tabs.dart';
 
 class MyApp extends StatelessWidget {
@@ -99,32 +98,36 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               child: Consumer(
                 builder: (context, ref, child) {
                   // Watch the allRosterLeaguesProvider to get loading/error states
-                  final allRosterLeaguesAsync = ref.watch(combinedRosterProvider);
+                  final allRosterLeaguesAsync =
+                      ref.watch(combinedRosterProvider);
                   final leagueAsync = ref.watch(leagueProvider);
-              
+
                   // Watch the filtered results (not async)
                   final filteredRosters =
                       ref.watch(filteredRosterLeaguesProvider);
                   final currentFilter = ref.watch(filterUserIdProvider);
-              
+
                   return allRosterLeaguesAsync.when(
                     loading: () => Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Text('Error: ${error.toString()}'),
+                    error: (error, stack) {
+                      print(error);
+                      return Text('Error: ${error.toString()}');
+                    },
                     data: (_) {
                       if (filteredRosters.isEmpty && currentFilter == null) {
                         return const Center(child: Text('No rosters found'));
                       }
-              
+
                       // Create a list of all display names for the dropdown
                       final allDisplayNames = <String>[];
-              
+
                       // Add the display names from the unfiltered data
                       allRosterLeaguesAsync.value?.forEach((roster) {
                         if (!allDisplayNames.contains(roster.displayName)) {
                           allDisplayNames.add(roster.displayName);
                         }
                       });
-              
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -137,9 +140,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                     setState(() {
                                       selectedUser = newValue;
                                       ref
-                                              .read(filterUserIdProvider.notifier)
-                                              .state =
-                                          newValue == 'None' ? null : newValue;
+                                          .read(filterUserIdProvider.notifier)
+                                          .state = newValue ==
+                                              'None'
+                                          ? null
+                                          : newValue;
                                     });
                                   },
                                   dropdownMenuEntries: [
@@ -148,7 +153,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                     ...allDisplayNames.map((username) {
                                       final rosterId = username;
                                       final userName = username;
-              
+
                                       return DropdownMenuEntry<String>(
                                         value: username,
                                         label: username,

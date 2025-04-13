@@ -34,6 +34,8 @@ class SleeperRepositoryImpl implements SleeperRepository {
 
       return data;
     } catch (error) {
+      print("Roster Error");
+
       throw ErrorHandler.handle(error).failure;
     }
   }
@@ -60,9 +62,12 @@ class SleeperRepositoryImpl implements SleeperRepository {
             for (var matchup in matchups) matchup.rosterId: matchup
           };
         } else if (response.data == null) {
+          print("Weeks Error");
+
           break;
         }
       } catch (error) {
+        print("Weeks Error");
         throw ErrorHandler.handle(error).failure;
       }
 

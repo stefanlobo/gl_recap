@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
-import 'package:guillotine_recap/standings.dart';
-import 'package:guillotine_recap/stats_screen.dart';
+import 'package:guillotine_recap/screen/standings_screen.dart';
+import 'package:guillotine_recap/screen/stats_screen.dart';
 // Import your other screens/widgets here
 
 // Convert to ConsumerStatefulWidget to use Riverpod
