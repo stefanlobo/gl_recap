@@ -3,4 +3,7 @@ class Failure {
   String message; // error , success
 
   Failure(this.code, this.message);
+
+  @override
+  String toString() => 'Failure(code: $code, message: $message)';
 }

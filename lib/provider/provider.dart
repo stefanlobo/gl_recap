@@ -17,7 +17,8 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 final leagueNumberProvider = StateProvider<String>((ref) {
-  return '1124823008221884416'; // Other league to try : 1124823008221884416, 1124849636478046208
+  return '1124823008221884416'; // Other league to try : (B, 1124823008221884416), (S, 1124849636478046208), (C, 1117541005508644864, kicked people out so ownerID is null)
+  // Not a gleague: 1124834174071492608
 });
 
 final leagueProvider = FutureProvider.autoDispose<League>((ref) async {
@@ -52,7 +53,6 @@ final usersProvider = FutureProvider.autoDispose<List<User>>((ref) async {
 final weeksProvider =
     FutureProvider.autoDispose<Map<int, Map<int, MatchupWeek>>>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
-
   final weeks = await ref
       .watch(sleeperRepositoryProvider)
       .getAllWeeks(leagueId: leagueNumber);

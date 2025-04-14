@@ -14,18 +14,18 @@ class User {
   @JsonKey(name: 'avatar')
   final String avatar;
 
-  @JsonKey(name: 'metadata')
-  final UserMetadata metadata;
+  // @JsonKey(name: 'metadata')
+  // final UserMetadata metadata;
 
-  @JsonKey(name: 'is_owner')
-  final bool isOwner;
+  // @JsonKey(name: 'is_owner')
+  // final bool isOwner;
 
   User({
     required this.userId,
     required this.displayName,
     required this.avatar,
-    required this.metadata,
-    required this.isOwner,
+    // required this.metadata,
+    // required this.isOwner,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
