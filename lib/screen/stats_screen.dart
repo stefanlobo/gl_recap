@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guillotine_recap/model/head_to_head.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
+import 'package:guillotine_recap/widgets/matchup_card.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
@@ -24,169 +27,38 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   Widget build(BuildContext context) {
     final filteredRoster = ref.watch(filteredRosterLeaguesProvider);
     statsRoster = List.from(filteredRoster);
+
+    // Get the screen width to help with sizing
+    final screenWidth = MediaQuery.of(context).size.width;
+
     closestMatchups = calculateClosestMatchups(statsRoster);
+    final furthestBottomTwo = calculateFurthestBottomTwo(statsRoster);
+    final largestTopBottom = calculateAbsoulteDemolition(statsRoster);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ConstrainedBox(
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: 500,
+            maxWidth: min(screenWidth * 0.95, 5000), // Constrain max width, use min to avoid overflows
           ),
-          child: Card(
-            elevation: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text("Top 5 Closest Lowest Two Scores"),
-                ),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: closestMatchups.length,
-                    itemBuilder: (context, index) {
-                      final matchup = closestMatchups[index];
-                      final scoreDifference =
-                          (closestMatchups[index].scoreDifference).abs();
-
-                      return Card(
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 6.0),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  topRight: Radius.circular(12),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "#${index + 1} Closest Matchup",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                    ),
-                                  ),
-                                  SizedBox(width: 6),
-                                  if (index == 0)
-                                    Icon(
-                                      Icons.emoji_events,
-                                      color: Colors.amber,
-                                      size: 18,
-                                    ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12.0, horizontal: 16.0),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "Week ${matchup.week}",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 2.0),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary
-                                          .withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Text(
-                                      "Diff: ${scoreDifference.toStringAsFixed(1)} pts",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            _buildPlayerScoreRow(
-                              context,
-                              matchup.player2Name,
-                              matchup.player2Score,
-                              matchup.player2Score > matchup.player1Score,
-                            ),
-                            Divider(height: 1),
-                            _buildPlayerScoreRow(
-                              context,
-                              matchup.player1Name,
-                              matchup.player1Score,
-                              matchup.player1Score > matchup.player2Score,
-                            ),
-                            SizedBox(height: 12),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                )
-              ],
-            ),
+          child: Wrap(
+            alignment: WrapAlignment.spaceEvenly,
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              MatchupCard(matchups: closestMatchups, title: "Tight Finish", subtitle: "Ouch Matchup"),
+              MatchupCard(matchups: furthestBottomTwo, title: "Not Even Close", subtitle: "Furthest Matchup"),
+              MatchupCard(matchups: largestTopBottom, title: "David vs Goliath", subtitle: "Demolished"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+              // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
+            ],
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildPlayerScoreRow(
-      BuildContext context, String playerName, double score, bool isWinner) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-      child: Row(
-        children: [
-          if (isWinner)
-            Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 16,
-            ),
-          if (isWinner) SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              playerName,
-              style: TextStyle(
-                fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ),
-          Text(
-            score.toStringAsFixed(1),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -196,8 +68,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     List<MatchupData> weekToWeekBottomTwo = [];
 
     final totalWeeksLength = allRosters.first.truePoints.length;
-    final totalWeeksList =
-        List.generate(totalWeeksLength, (generator) => generator);
+    final totalWeeksList = List.generate(totalWeeksLength, (generator) => generator);
 
     for (final week in totalWeeksList) {
       var lowest = double.infinity;
@@ -205,8 +76,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       var player1 = '';
       var player2 = '';
 
-      allRosters
-          .sort((a, b) => a.truePoints[week].compareTo(b.truePoints[week]));
+      allRosters.sort((a, b) => a.truePoints[week].compareTo(b.truePoints[week]));
 
       for (final roster in allRosters) {
         final weekPoint = roster.truePoints[week];
@@ -237,8 +107,100 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       }
     }
 
-    weekToWeekBottomTwo
-        .sort((a, b) => a.scoreDifference.compareTo(b.scoreDifference));
+    weekToWeekBottomTwo.sort((a, b) => a.scoreDifference.compareTo(b.scoreDifference));
+    List<MatchupData> topFive = weekToWeekBottomTwo.take(5).toList();
+
+    return topFive;
+  }
+
+  // The furthest distance between the bottom two lowest
+  List<MatchupData> calculateFurthestBottomTwo(List<RosterLeague> allRosters) {
+    List<MatchupData> weekToWeekBottomTwo = [];
+
+    final totalWeeksLength = allRosters.first.truePoints.length;
+    final totalWeeksList = List.generate(totalWeeksLength, (generator) => generator);
+
+    for (final week in totalWeeksList) {
+      var lowest = double.infinity;
+      var second_lowest = double.infinity;
+      var player1 = '';
+      var player2 = '';
+
+      allRosters.sort((a, b) => a.truePoints[week].compareTo(b.truePoints[week]));
+
+      for (final roster in allRosters) {
+        final weekPoint = roster.truePoints[week];
+        final playerName = roster.displayName;
+
+        if (weekPoint == 0.0) continue;
+
+        if (lowest == double.infinity) {
+          lowest = weekPoint;
+          player1 = playerName;
+        } else {
+          if (second_lowest == double.infinity) {
+            second_lowest = weekPoint;
+            player2 = playerName;
+            break;
+          }
+        }
+      }
+
+      if (lowest != double.infinity && second_lowest != double.infinity) {
+        MatchupData weekData = MatchupData(
+            week: week + 1,
+            player1Name: player1,
+            player1Score: lowest,
+            player2Name: player2,
+            player2Score: second_lowest);
+        weekToWeekBottomTwo.add(weekData);
+      }
+    }
+
+    weekToWeekBottomTwo.sort((a, b) => b.scoreDifference.compareTo(a.scoreDifference));
+    List<MatchupData> topFive = weekToWeekBottomTwo.take(5).toList();
+
+    return topFive;
+  }
+
+  // The furthest distance between top scorer and lowest scorer
+  List<MatchupData> calculateAbsoulteDemolition(List<RosterLeague> allRosters) {
+    List<MatchupData> weekToWeekBottomTwo = [];
+
+    final totalWeeksLength = allRosters.first.truePoints.length;
+    final totalWeeksList = List.generate(totalWeeksLength, (generator) => generator);
+
+    for (final week in totalWeeksList) {
+      var lowest = double.infinity;
+      var highest = 0.0;
+      var player1 = '';
+      var player2 = '';
+
+      //allRosters.sort((a, b) => a.truePoints[week].compareTo(b.truePoints[week]));
+
+      for (final roster in allRosters) {
+        final weekPoint = roster.truePoints[week];
+        final playerName = roster.displayName;
+
+        if (weekPoint == 0.0) continue;
+
+        if (lowest > weekPoint) {
+          lowest = weekPoint;
+          player1 = playerName;
+        } else if (highest < weekPoint) {
+          highest = weekPoint;
+          player2 = playerName;
+        }
+      }
+
+      if (lowest != double.infinity && highest != 0.0) {
+        MatchupData weekData = MatchupData(
+            week: week + 1, player1Name: player1, player1Score: lowest, player2Name: player2, player2Score: highest);
+        weekToWeekBottomTwo.add(weekData);
+      }
+    }
+
+    weekToWeekBottomTwo.sort((a, b) => b.scoreDifference.compareTo(a.scoreDifference));
     List<MatchupData> topFive = weekToWeekBottomTwo.take(5).toList();
 
     return topFive;
