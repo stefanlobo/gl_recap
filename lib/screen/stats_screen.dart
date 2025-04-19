@@ -16,7 +16,6 @@ class StatsScreen extends ConsumerStatefulWidget {
 
 class _StatsScreenState extends ConsumerState<StatsScreen> {
   List<RosterLeague> statsRoster = [];
-  List<MatchupData> closestMatchups = [];
 
   @override
   void initState() {
@@ -31,7 +30,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     // Get the screen width to help with sizing
     final screenWidth = MediaQuery.of(context).size.width;
 
-    closestMatchups = calculateClosestMatchups(statsRoster);
+    final closestMatchups = calculateClosestMatchups(statsRoster);
     final furthestBottomTwo = calculateFurthestBottomTwo(statsRoster);
     final largestTopBottom = calculateAbsoulteDemolition(statsRoster);
 
@@ -46,7 +45,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              MatchupCard(matchups: closestMatchups, title: "Tight Finish", subtitle: "Ouch Matchup"),
+              MatchupCard(matchups: closestMatchups, title: "Tight Race", subtitle: "Ouch Matchup"),
               MatchupCard(matchups: furthestBottomTwo, title: "Not Even Close", subtitle: "Furthest Matchup"),
               MatchupCard(matchups: largestTopBottom, title: "David vs Goliath", subtitle: "Demolished"),
               // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),

@@ -10,7 +10,7 @@ import 'package:guillotine_recap/repository/repository_impl.dart';
 import 'package:guillotine_recap/repository/repository.dart';
 import 'package:guillotine_recap/app/di.dart';
 import 'package:guillotine_recap/screen/standings_screen.dart';
-import 'package:guillotine_recap/tabs.dart';
+import 'package:guillotine_recap/screen/tabs_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

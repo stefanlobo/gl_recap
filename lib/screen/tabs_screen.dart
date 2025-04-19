@@ -21,8 +21,7 @@ class FFWrappedStyleTabs extends ConsumerStatefulWidget {
   ConsumerState<FFWrappedStyleTabs> createState() => _FFWrappedStyleTabsState();
 }
 
-class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs>
-    with SingleTickerProviderStateMixin {
+class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -75,9 +74,9 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs>
               ),
               tabs: [
                 Tab(text: "Standings"),
-                Tab(text: "Closest Matchups"),
-                // Tab(text: "Weekly Leaders"),
-                // Tab(text: "Team Recaps"),
+                Tab(text: "Matchups"),
+                // Tab(text: "Superlatives"),
+                // Tab(text: "Players"),
               ],
             ),
           ),
