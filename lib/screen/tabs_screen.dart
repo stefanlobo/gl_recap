@@ -4,6 +4,7 @@ import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/screen/standings_screen.dart';
 import 'package:guillotine_recap/screen/stats_screen.dart';
+import 'package:guillotine_recap/screen/superlatives_screen.dart';
 // Import your other screens/widgets here
 
 // Convert to ConsumerStatefulWidget to use Riverpod
@@ -27,7 +28,7 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -75,7 +76,7 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
               tabs: [
                 Tab(text: "Standings"),
                 Tab(text: "Matchups"),
-                // Tab(text: "Superlatives"),
+                Tab(text: "Superlatives"),
                 // Tab(text: "Players"),
               ],
             ),
@@ -89,8 +90,8 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
           Standings(filteredRosters: widget.filteredRosters),
           // Tab 2: Closest Matchups
           StatsScreen(),
-          // // Tab 3: Weekly Leaders
-          // Center(child: Text("Weekly Leaders Tab")),
+          //Tab 3: Superlatives
+          SuperlativesScreen(),
           // // Tab 4: Team Recaps
           // Center(child: Text("Team Recaps Tab")),
         ],
