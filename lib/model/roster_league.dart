@@ -13,7 +13,7 @@ class RosterLeague {
   late final List<String>? deathStarters;
   late final List<String>? deathPlayers;
   late final double? deathPoints;
-  late final deathWeek;
+  late final int? deathWeek;
 
   // Weeks data
   // week # : Matchup Info (points, players, etc)
@@ -53,8 +53,7 @@ class RosterLeagueCalculator {
         final currentRosterId = roster.rosterId;
 
         if (weekData != null) {
-          if (weekData.points < lowestScore &&
-              !deadRosters.contains(currentRosterId)) {
+          if (weekData.points < lowestScore && !deadRosters.contains(currentRosterId)) {
             lowestScore = weekData.points;
             lowestScoreRosterId = currentRosterId;
           }
@@ -86,23 +85,18 @@ class RosterLeagueCalculator {
 
       for (final week in allWeeks) {
         final weekScore = roster.weeks[week]?.points ?? 0.0;
-        roster.truePoints
-            .add((!isDead || week <= deathWeek!) ? weekScore : 0.0);
+        roster.truePoints.add((!isDead || week <= deathWeek!) ? weekScore : 0.0);
       }
 
       roster.deathWeek = isDead ? deathWeek : null;
 
-      roster.deathPlayers = deathWeek != null
-          ? roster.weeks[deathWeek]?.players
-          : roster.weeks[sortedWeeks.last]?.players;
+      roster.deathPlayers =
+          deathWeek != null ? roster.weeks[deathWeek]?.players : roster.weeks[sortedWeeks.last]?.players;
 
-      roster.deathPoints = deathWeek != null
-          ? roster.weeks[deathWeek]?.points
-          : roster.weeks[sortedWeeks.last]?.points;
+      roster.deathPoints = deathWeek != null ? roster.weeks[deathWeek]?.points : roster.weeks[sortedWeeks.last]?.points;
 
-      roster.deathStarters = deathWeek != null
-          ? roster.weeks[deathWeek]?.starters
-          : roster.weeks[sortedWeeks.last]?.starters;
+      roster.deathStarters =
+          deathWeek != null ? roster.weeks[deathWeek]?.starters : roster.weeks[sortedWeeks.last]?.starters;
     }
   }
 }

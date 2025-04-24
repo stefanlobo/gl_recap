@@ -61,8 +61,7 @@ class _StandingsState extends State<Standings> {
       child: Center(
         child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: min(screenWidth * 0.95,
-                  2000), // Constrain max width, use min to avoid overflows
+              maxWidth: min(screenWidth * 0.95, 1500), // Constrain max width, use min to avoid overflows
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -95,16 +94,14 @@ class _StandingsState extends State<Standings> {
                 if (a.deathPoints == null && b.deathPoints == null) return 0;
                 if (a.deathPoints == null) return -1; // a is "greater"
                 if (b.deathPoints == null) return 1; // b is "greater"
-                return b.deathPoints!
-                    .compareTo(a.deathPoints!); // both non-null
+                return b.deathPoints!.compareTo(a.deathPoints!); // both non-null
               });
             } else {
               _sortedRosters.sort((a, b) {
                 if (a.deathPoints == null && b.deathPoints == null) return 0;
                 if (a.deathPoints == null) return 1; // a is "greater"
                 if (b.deathPoints == null) return -1; // b is "greater"
-                return a.deathPoints!
-                    .compareTo(b.deathPoints!); // both non-null
+                return a.deathPoints!.compareTo(b.deathPoints!); // both non-null
               });
             }
 

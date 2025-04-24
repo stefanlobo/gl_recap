@@ -38,7 +38,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: min(screenWidth * 0.95, 5000), // Constrain max width, use min to avoid overflows
+            maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
           ),
           child: Wrap(
             alignment: WrapAlignment.spaceEvenly,

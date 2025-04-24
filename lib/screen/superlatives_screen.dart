@@ -35,6 +35,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     List<Superlative>? biggestDrop = calculateBiggestDrop(statsRoster);
+    List<Superlative>? unluckyStreak = calculateUnluckyStreak(statsRoster);
 
     print(biggestDrop);
 
@@ -42,7 +43,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: min(screenWidth * 0.95, 5000), // Constrain max width, use min to avoid overflows
+            maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
           ),
           child: Wrap(
             alignment: WrapAlignment.spaceEvenly,
@@ -53,7 +54,9 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
                 SuperlativesCard(superlatives: biggestDrop, title: "Biggest Drop to Death", subtitle: "Largest Drop"),
               SizedBox(
                 height: 12,
-              )
+              ),
+              if (unluckyStreak != null && unluckyStreak.isNotEmpty)
+                SuperlativesCard(superlatives: unluckyStreak, title: "Unlucky Streak", subtitle: "Unlucky"),
             ],
           ),
         ),
@@ -96,5 +99,53 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     }
 
     return biggestDrop;
+  }
+
+  // The furthest distance between the bottom two lowest
+  List<Superlative>? calculateUnluckyStreak(List<RosterLeague> allRosters) {
+    allRosters.sort((a, b) {
+      final aDeathWeek = a.deathWeek ?? 9999; // handle the winner being null
+      final bDeathWeek = b.deathWeek ?? 9999;
+      return aDeathWeek.compareTo(bDeathWeek);
+    });
+
+    List<Superlative> result = [];
+
+    for (int i = 0; i < allRosters.length; i++) {
+      final current = allRosters[i];
+      final currentPoints = current.deathPoints;
+      final currentWeek = current.deathWeek;
+      final currentName = current.displayName ?? "Player";
+
+      if (currentPoints == null || currentWeek == null) continue;
+
+      List<double> scores = [currentPoints];
+
+      for (int j = i + 1; j < allRosters.length; j++) {
+        final nextPoints = allRosters[j].deathPoints;
+        if (nextPoints != null && nextPoints < currentPoints) {
+          scores.add(nextPoints);
+        } else {
+          break;
+        }
+      }
+
+      result.add(Superlative(
+        week: currentWeek,
+        playerName: currentName,
+        scores: scores,
+      ));
+    }
+
+    if (result.isNotEmpty) {
+      // Sort descending by scoreDifference
+      result.sort((a, b) => b.scores.length.compareTo(a.scores.length));
+
+      final top = result[0].scores.length;
+
+      result = result.where((r) => r.scores.length == top).toList();
+    }
+
+    return result;
   }
 }

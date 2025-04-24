@@ -81,9 +81,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                 Padding(
                   padding: const EdgeInsets.only(left: 16.0),
                   child: Text(
-                    isShowingPointData
-                        ? "Points Per Week"
-                        : "Standings Per Week",
+                    isShowingPointData ? "Points Per Week" : "Standings Per Week",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -111,8 +109,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                     color: Colors.blue,
                     size: 28,
                   ),
-                  tooltip:
-                      "Switch to ${isShowingPointData ? 'Standings' : 'Points'} View",
+                  tooltip: "Switch to ${isShowingPointData ? 'Standings' : 'Points'} View",
                 ),
               ],
             ),
@@ -129,9 +126,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                       padding: const EdgeInsets.all(8.0),
                       child: LineChart(
                         isShowingPointData ? pointData : standingData,
-                        duration: isViewChanging
-                            ? const Duration(milliseconds: 500)
-                            : Duration.zero,
+                        duration: isViewChanging ? const Duration(milliseconds: 500) : Duration.zero,
                       ),
                     ),
                   ),
@@ -152,10 +147,12 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
           touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (List<LineBarSpot> touchedSpots) {
               return touchedSpots.map((spot) {
-                final rosterIndex = spot.barIndex;
+                // final rosterIndex = spot.barIndex;
+                // final roster = finalRoster[rosterIndex];
+                final barIndex = spot.barIndex;
+                final rosterIndex = lineIndexToRosterIndex[barIndex] ?? barIndex;
                 final roster = finalRoster[rosterIndex];
-                final rosterName =
-                    roster.displayName ?? 'Roster ${rosterIndex + 1}';
+                final rosterName = roster.displayName ?? 'Roster ${rosterIndex + 1}';
                 final color = colors[rosterIndex % colors.length];
 
                 return LineTooltipItem(
@@ -171,8 +168,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
             },
           ),
         ),
-        gridData: FlGridData(
-            show: true, drawVerticalLine: false, horizontalInterval: 10),
+        gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: 10),
         titlesData: FlTitlesData(
           show: true,
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -202,14 +198,12 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
             ),
           ),
         ),
-        borderData: FlBorderData(
-            show: true, border: Border.all(color: const Color(0xff37434d))),
+        borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xff37434d))),
         minX: 1,
         maxX: getMaxWeek(),
         minY: getMinPoints(),
         maxY: getMaxPoints(),
-        lineBarsData:
-            reorderLinesWithSelectionOnTop(getLineBarsPointData(colors)),
+        lineBarsData: reorderLinesWithSelectionOnTop(getLineBarsPointData(colors)),
       );
 
   LineChartData get standingData => LineChartData(
@@ -217,16 +211,20 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
           touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (List<LineBarSpot> touchedSpots) {
               return touchedSpots.map((spot) {
-                final rosterIndex = spot.barIndex;
+                // final rosterIndex = spot.barIndex;
+                // final roster = finalRoster[rosterIndex];
+                final barIndex = spot.barIndex;
+                final rosterIndex = lineIndexToRosterIndex[barIndex] ?? barIndex;
                 final roster = finalRoster[rosterIndex];
-                final rosterName =
-                    roster.displayName ?? 'Roster ${rosterIndex + 1}';
+                final rosterName = roster.displayName ?? 'Roster ${rosterIndex + 1}';
                 final color = colors[rosterIndex % colors.length];
 
                 int flipped = spot.y.toInt();
                 int position = finalRoster.length - (flipped - 1);
 
                 String positionText = '$position';
+
+                print("${rosterName} and ${position.toString()}");
 
                 if (position == 1) {
                   positionText = '1st';
@@ -251,8 +249,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
             },
           ),
         ),
-        gridData: FlGridData(
-            show: true, drawVerticalLine: false, horizontalInterval: 1),
+        gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: 1),
         titlesData: FlTitlesData(
           show: true,
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -302,14 +299,12 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
             ),
           ),
         ),
-        borderData: FlBorderData(
-            show: true, border: Border.all(color: const Color(0xff37434d))),
+        borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xff37434d))),
         minX: 1,
         maxX: getMaxWeek(),
         minY: 1,
         maxY: finalRoster.length.toDouble(),
-        lineBarsData:
-            reorderLinesWithSelectionOnTop(getLineBarsStandingData(colors)),
+        lineBarsData: reorderLinesWithSelectionOnTop(getLineBarsStandingData(colors)),
       );
 
   List<LineChartBarData> getLineBarsPointData(List<Color> colors) {
@@ -368,8 +363,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
       }
 
       // Sort by points (descending) to determine standings
-      weeklyStandings[week + 1]!
-          .sort((a, b) => b['points'].compareTo(a['points']));
+      weeklyStandings[week + 1]!.sort((a, b) => b['points'].compareTo(a['points']));
     }
 
     // Now create a line for each roster showing their standing over time
@@ -389,15 +383,13 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
           int standing = 1;
           for (int j = 0; j < weekData.length; j++) {
             if (weekData[j]['rosterIndex'] == i) {
-              standing =
-                  j + 1; // +1 because index starts at 0, standings start at 1
+              standing = j + 1; // +1 because index starts at 0, standings start at 1
               break;
             }
           }
 
           // Only add if there was actual data for this week
-          if (weekData
-              .any((item) => item['rosterIndex'] == i && item['points'] > 0)) {
+          if (weekData.any((item) => item['rosterIndex'] == i && item['points'] > 0)) {
             final flippedStanding = finalRoster.length - (standing - 1);
             spots.add(FlSpot(week.toDouble(), flippedStanding.toDouble()));
           }
@@ -413,8 +405,15 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     return lines;
   }
 
-  List<LineChartBarData> reorderLinesWithSelectionOnTop(
-      List<LineChartBarData> lines) {
+  Map<int, int> lineIndexToRosterIndex = {};
+
+  List<LineChartBarData> reorderLinesWithSelectionOnTop(List<LineChartBarData> lines) {
+    // Initialize the mapping (bar index → roster index)
+    lineIndexToRosterIndex.clear();
+    for (int i = 0; i < lines.length; i++) {
+      lineIndexToRosterIndex[i] = i;
+    }
+
     if (selectedLineIndex == null || selectedLineIndex! >= lines.length) {
       return lines; // No need to reorder if nothing is selected
     }
@@ -427,6 +426,16 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
 
     // Add it back at the end so it's drawn last (on top)
     reorderedLines.add(selectedLine);
+
+    // Update the mapping to reflect the new order
+    lineIndexToRosterIndex.clear();
+    for (int i = 0; i < selectedLineIndex!; i++) {
+      lineIndexToRosterIndex[i] = i;
+    }
+    for (int i = selectedLineIndex!; i < lines.length - 1; i++) {
+      lineIndexToRosterIndex[i] = i + 1;
+    }
+    lineIndexToRosterIndex[lines.length - 1] = selectedLineIndex!;
 
     return reorderedLines;
   }
@@ -462,8 +471,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     double maxPoints = 0;
 
     for (final roster in finalRoster) {
-      final maxInRoster =
-          roster.truePoints.isNotEmpty ? roster.truePoints.reduce(max) : 0.0;
+      final maxInRoster = roster.truePoints.isNotEmpty ? roster.truePoints.reduce(max) : 0.0;
       maxPoints = max(maxPoints, maxInRoster);
     }
 
@@ -475,8 +483,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
 
     for (final roster in finalRoster) {
       // Filter out zeros and empty lists
-      final nonZeroPoints =
-          roster.truePoints.where((point) => point > 0).toList();
+      final nonZeroPoints = roster.truePoints.where((point) => point > 0).toList();
 
       if (nonZeroPoints.isNotEmpty) {
         final currentMin = nonZeroPoints.reduce(min);
@@ -529,12 +536,9 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                 margin: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
                 padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
                 decoration: BoxDecoration(
-                  color:
-                      isSelected ? color.withOpacity(0.2) : Colors.transparent,
+                  color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                      color: isSelected ? color : Colors.transparent,
-                      width: 1.5),
+                  border: Border.all(color: isSelected ? color : Colors.transparent, width: 1.5),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -552,8 +556,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                       rosterName,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                   ],
