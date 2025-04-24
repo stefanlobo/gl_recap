@@ -224,8 +224,6 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
 
                 String positionText = '$position';
 
-                print("${rosterName} and ${position.toString()}");
-
                 if (position == 1) {
                   positionText = '1st';
                 } else if (position == 2) {
@@ -355,6 +353,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
           points = roster.truePoints[week];
         }
 
+        // For true points, the week is normal indexing i.e start at 0, however, here we want to start with week 1
         weeklyStandings[week + 1]!.add({
           "rosterIndex": i,
           "roster": roster,

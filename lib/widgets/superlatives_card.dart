@@ -82,7 +82,7 @@ class SuperlativesCard extends StatelessWidget {
                           child: Row(
                             children: [
                               Text(
-                                "Week ${superlative.week} - Week ${superlative.week + superlative.scores.length - 1}",
+                                _getWeekRangeText(superlative),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -123,6 +123,31 @@ class SuperlativesCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Helper method to get a formatted week range
+  String _getWeekRangeText(Superlative superlative) {
+    if (superlative.weeks.isEmpty) {
+      return "No Weeks";
+    } else if (superlative.weeks.length == 1) {
+      return "Week ${superlative.weeks[0]}";
+    } else {
+      // Sort the weeks to make sure they are in ascending order
+      List<int> sortedWeeks = List.from(superlative.weeks)..sort();
+
+      bool areConsecutive = true;
+      for (int i = 0; i < sortedWeeks.length - 1; i++) {
+        if (sortedWeeks[i + 1] - sortedWeeks[i] != 1) {
+          areConsecutive = false;
+          break;
+        }
+      }
+      if (areConsecutive) {
+        return "Week ${sortedWeeks.first} - Week ${sortedWeeks.last}";
+      } else {
+        return "Weeks ${sortedWeeks.join(', ')}";
+      }
+    }
   }
 
   Widget _buildPlayerScoreRow(BuildContext context, String playerName, List<double> scores) {
