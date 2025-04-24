@@ -6,12 +6,14 @@ class SuperlativesCard extends StatelessWidget {
   final List<Superlative> superlatives;
   final String title;
   final String subtitle;
+  final bool diffTag;
 
   SuperlativesCard({
     Key? key,
     required this.superlatives,
     required this.title,
     required this.subtitle,
+    required this.diffTag,
   }) : super(key: key);
 
   @override
@@ -72,13 +74,6 @@ class SuperlativesCard extends StatelessWidget {
                                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                                   ),
                                 ),
-                              SizedBox(width: 6),
-                              if (index == 0)
-                                Icon(
-                                  Icons.emoji_events,
-                                  color: Colors.amber,
-                                  size: 18,
-                                ),
                             ],
                           ),
                         ),
@@ -94,20 +89,21 @@ class SuperlativesCard extends StatelessWidget {
                                 ),
                               ),
                               Spacer(),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  "Diff: ${scoreDifference.toStringAsFixed(1)} pts",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.secondary,
+                              if (diffTag)
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    "Diff: ${scoreDifference.toStringAsFixed(1)} pts",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.secondary,
+                                    ),
                                   ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -130,9 +126,6 @@ class SuperlativesCard extends StatelessWidget {
   }
 
   Widget _buildPlayerScoreRow(BuildContext context, String playerName, List<double> scores) {
-    // Format the scores as a list, e.g., "97.0 - 67.0"
-    String formattedScores = scores.map((score) => score.toStringAsFixed(1)).join(' - ');
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
       child: Row(
@@ -145,15 +138,45 @@ class SuperlativesCard extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            formattedScores,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+          RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).textTheme.bodyLarge?.color, // Default text color
+              ),
+              children: _buildScoreTextSpans(scores),
             ),
           ),
         ],
       ),
     );
+  }
+
+  List<TextSpan> _buildScoreTextSpans(List<double> scores) {
+    List<TextSpan> spans = [];
+
+    for (int i = 0; i < scores.length; i++) {
+      // Add the score with appropriate color
+      spans.add(
+        TextSpan(
+          text: scores[i].toStringAsFixed(2),
+          style: TextStyle(
+            color: i == 0 ? Colors.green : Colors.red,
+          ),
+        ),
+      );
+
+      // Add separator except after the last item
+      if (i < scores.length - 1) {
+        spans.add(
+          TextSpan(
+            text: ' - ',
+          ),
+        );
+      }
+    }
+
+    return spans;
   }
 }

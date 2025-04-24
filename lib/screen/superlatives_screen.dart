@@ -51,12 +51,22 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
             runSpacing: 12,
             children: [
               if (biggestDrop != null && biggestDrop.isNotEmpty)
-                SuperlativesCard(superlatives: biggestDrop, title: "Biggest Drop to Death", subtitle: "Largest Drop"),
+                SuperlativesCard(
+                  superlatives: biggestDrop,
+                  title: "Biggest Drop to Death",
+                  subtitle: "Largest Drop",
+                  diffTag: true,
+                ),
               SizedBox(
                 height: 12,
               ),
               if (unluckyStreak != null && unluckyStreak.isNotEmpty)
-                SuperlativesCard(superlatives: unluckyStreak, title: "Unlucky Streak", subtitle: "Unlucky"),
+                SuperlativesCard(
+                  superlatives: unluckyStreak,
+                  title: "Unlucky Streak",
+                  subtitle: "Unlucky",
+                  diffTag: false,
+                ),
             ],
           ),
         ),

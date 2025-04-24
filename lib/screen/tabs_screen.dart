@@ -45,6 +45,7 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
     return Scaffold(
       appBar: AppBar(
         // Use the league name in the title when available
+        centerTitle: true,
         title: Text(widget.title),
         elevation: 0,
         bottom: PreferredSize(
@@ -61,6 +62,7 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
+              tabAlignment: TabAlignment.center,
               labelColor: Theme.of(context).colorScheme.primary,
               unselectedLabelColor: Colors.grey,
               indicatorWeight: 3,
