@@ -17,7 +17,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 final leagueNumberProvider = StateProvider<String>((ref) {
-  return '1124823008221884416'; // Other league to try : (B, 1124823008221884416), (S, 1124849636478046208), (C, 1117541005508644864, kicked people out so ownerID is null)
+  return '1124849636478046208'; // Other league to try : (B, 1124823008221884416), (S, 1124849636478046208), (C, 1117541005508644864, kicked people out so ownerID is null)
   // Not a gleague: 1124834174071492608
 });
 

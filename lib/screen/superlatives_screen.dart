@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:guillotine_recap/model/head_to_head.dart';
 import 'package:guillotine_recap/model/roster.dart';
@@ -45,55 +46,59 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     // Players
     // players with most unique teams "journeyman"
     // players with highest total cost "Sam Bradford Award"
-    //
+
+    final List<Widget> cards = [];
+
+    if (biggestDrop != null && biggestDrop.isNotEmpty) {
+      cards.add(SuperlativesCard(
+        superlatives: biggestDrop,
+        title: "Biggest Drop to Death",
+        subtitle: "Largest Drop",
+        diffTag: true,
+      ));
+    }
+
+    if (unluckyStreak != null && unluckyStreak.isNotEmpty) {
+      cards.add(SuperlativesCard(
+        superlatives: unluckyStreak,
+        title: "Unlucky Streak",
+        subtitle: "Unlucky",
+        diffTag: false,
+      ));
+    }
+
+    if (regularSeason != null && regularSeason.isNotEmpty) {
+      cards.add(SuperlativesCard(
+        superlatives: regularSeason,
+        title: "Regular Season MVP",
+        subtitle: "Most 1st Placements",
+        diffTag: false,
+      ));
+    }
+
+    if (bridesmaid != null && bridesmaid.isNotEmpty) {
+      cards.add(SuperlativesCard(
+        superlatives: bridesmaid,
+        title: "Always the Bridesmaid",
+        subtitle: "Most 2nd Placements",
+        diffTag: false,
+      ));
+    }
 
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
+            maxWidth: min(screenWidth * 0.95, 1500), // Constrain max width, use min to avoid overflows
           ),
-          child: Wrap(
-            alignment: WrapAlignment.start,
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              if (biggestDrop != null && biggestDrop.isNotEmpty)
-                SuperlativesCard(
-                  superlatives: biggestDrop,
-                  title: "Biggest Drop to Death",
-                  subtitle: "Largest Drop",
-                  diffTag: true,
-                ),
-              SizedBox(
-                height: 12,
-              ),
-              if (unluckyStreak != null && unluckyStreak.isNotEmpty)
-                SuperlativesCard(
-                  superlatives: unluckyStreak,
-                  title: "Unlucky Streak",
-                  subtitle: "Unlucky",
-                  diffTag: false,
-                ),
-              SizedBox(
-                height: 12,
-              ),
-              if (regularSeason != null && regularSeason.isNotEmpty)
-                SuperlativesCard(
-                    superlatives: regularSeason,
-                    title: "Regular Season MVP",
-                    subtitle: "Most 1st Placements",
-                    diffTag: false),
-              SizedBox(
-                height: 12,
-              ),
-              if (bridesmaid != null && bridesmaid.isNotEmpty)
-                SuperlativesCard(
-                    superlatives: bridesmaid,
-                    title: "Always the Bridesmaid",
-                    subtitle: "Most 2nd Placements",
-                    diffTag: false)
-            ],
+          child: MasonryGridView.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: cards.length,
+            itemBuilder: (context, index) => cards[index],
           ),
         ),
       ),
