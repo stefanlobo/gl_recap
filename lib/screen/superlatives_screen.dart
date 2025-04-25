@@ -36,8 +36,9 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
 
     List<Superlative>? biggestDrop = calculateBiggestDrop(statsRoster);
     List<Superlative>? unluckyStreak = calculateUnluckyStreak(statsRoster);
-    // most weeks at 1 "Regular Season MVP"
-    // most weeks at 2 "Always the Bridesmaid"
+    List<Superlative>? regularSeason = calculateMostWeeksAtOne(statsRoster); // most weeks at 1 "Regular Season MVP"
+    List<Superlative>? bridesmaid = calculateMostWeeksAtTwo(statsRoster); // most weeks at 2 "Always the Bridesmaid"
+
     // most weeks in bottom 50% "Survivor"
     // most weeks in top 50% "Not Riskin It"
 
@@ -46,8 +47,6 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     // players with highest total cost "Sam Bradford Award"
     //
 
-    print(biggestDrop);
-
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
@@ -55,7 +54,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
             maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
           ),
           child: Wrap(
-            alignment: WrapAlignment.spaceEvenly,
+            alignment: WrapAlignment.start,
             spacing: 12,
             runSpacing: 12,
             children: [
@@ -76,6 +75,24 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
                   subtitle: "Unlucky",
                   diffTag: false,
                 ),
+              SizedBox(
+                height: 12,
+              ),
+              if (regularSeason != null && regularSeason.isNotEmpty)
+                SuperlativesCard(
+                    superlatives: regularSeason,
+                    title: "Regular Season MVP",
+                    subtitle: "Most 1st Placements",
+                    diffTag: false),
+              SizedBox(
+                height: 12,
+              ),
+              if (bridesmaid != null && bridesmaid.isNotEmpty)
+                SuperlativesCard(
+                    superlatives: bridesmaid,
+                    title: "Always the Bridesmaid",
+                    subtitle: "Most 2nd Placements",
+                    diffTag: false)
             ],
           ),
         ),
@@ -176,5 +193,135 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     return result.isEmpty ? null : result;
   }
 
-  List<Superlative>? calculateMostWeeksAtOne(List<RosterLeague> allRosters) {}
+  // Calculates the most weeks that someone was at the top
+  List<Superlative>? calculateMostWeeksAtOne(List<RosterLeague> allRosters) {
+    List<Superlative> mostAtOneList = [];
+    int maxWeek = allRosters.first.truePoints.length;
+    Map<int, List<List<double>>> highMap = {};
+
+    for (int week = 0; week < maxWeek; week++) {
+      var realWeek = week + 1;
+
+      var highestPoints = 0.0;
+      var highestRosterId = -1;
+
+      for (final roster in allRosters) {
+        var weekPoints = roster.truePoints[week];
+        var currRosterID = roster.rosterId;
+        if (highestPoints < weekPoints) {
+          highestPoints = weekPoints; // the highest points for the week
+          highestRosterId = currRosterID; // the assoiciated roster ID that got this score
+        }
+      }
+
+      var weekAndPoints = [realWeek.toDouble(), highestPoints];
+
+      if (highMap.containsKey(highestRosterId)) {
+        highMap[highestRosterId]!.add(weekAndPoints);
+      } else {
+        highMap[highestRosterId] = [weekAndPoints];
+      }
+    }
+
+    if (highMap.isEmpty) return [];
+
+    // Convert map entries to a list
+    var sortedEntries = highMap.entries.toList();
+
+    // Sort by the length of the value list (descending)
+    sortedEntries.sort((a, b) => b.value.length.compareTo(a.value.length));
+
+    final top = sortedEntries.first.value.length;
+
+    final result = sortedEntries.where((r) => r.value.length == top).toList();
+
+    for (var high in result) {
+      RosterLeague matchingRoster = allRosters.firstWhere(
+        (r) => r.rosterId == high.key,
+      );
+
+      List<int> weeks = [];
+      List<double> points = [];
+
+      for (final combo in high.value) {
+        weeks.add(combo[0].toInt());
+        points.add(combo[1]);
+      }
+
+      final mostOneRoster = Superlative.mostWeeksAtPosition(
+          playerName: matchingRoster.displayName, weeks: weeks, position: "first", relevantScores: points);
+
+      mostAtOneList.add(mostOneRoster);
+    }
+
+    return mostAtOneList;
+  }
+
+  List<Superlative>? calculateMostWeeksAtTwo(List<RosterLeague> allRosters) {
+    List<Superlative> mostAtTwoList = [];
+    int maxWeek = allRosters.first.truePoints.length;
+    Map<int, List<List<double>>> highMap = {};
+
+    for (int week = 0; week < maxWeek; week++) {
+      var realWeek = week + 1;
+
+      double first = -1;
+      double second = -1;
+      int secondRosterId = -1;
+
+      for (final roster in allRosters) {
+        var weekPoints = roster.truePoints[week];
+        var currRosterID = roster.rosterId;
+        if (weekPoints > first) {
+          second = first;
+          secondRosterId = secondRosterId == -1 ? -1 : currRosterID; // Temporarily hold
+          first = weekPoints;
+        } else if (weekPoints > second) {
+          second = weekPoints;
+          secondRosterId = currRosterID;
+        }
+      }
+
+      var weekAndPoints = [realWeek.toDouble(), second];
+
+      if (highMap.containsKey(secondRosterId)) {
+        highMap[secondRosterId]!.add(weekAndPoints);
+      } else {
+        highMap[secondRosterId] = [weekAndPoints];
+      }
+    }
+
+    if (highMap.isEmpty) return [];
+
+    // Convert map entries to a list
+    var sortedEntries = highMap.entries.toList();
+
+    // Sort by the length of the value list (descending)
+    sortedEntries.sort((a, b) => b.value.length.compareTo(a.value.length));
+
+    final top = sortedEntries.first.value.length;
+
+    final result = sortedEntries.where((r) => r.value.length == top).toList();
+
+    for (var high in result) {
+      RosterLeague matchingRoster = allRosters.firstWhere(
+        (r) => r.rosterId == high.key,
+      );
+
+      List<int> weeks = [];
+      List<double> points = [];
+
+      for (final combo in high.value) {
+        weeks.add(combo[0].toInt());
+        points.add(combo[1]);
+      }
+
+      final mostOneRoster = Superlative.mostWeeksAtPosition(
+          playerName: matchingRoster.displayName, weeks: weeks, position: "second", relevantScores: points);
+
+      mostAtTwoList.add(mostOneRoster);
+    }
+
+    return mostAtTwoList;
+  }
 }
