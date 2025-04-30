@@ -39,9 +39,8 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     List<Superlative>? unluckyStreak = calculateUnluckyStreak(statsRoster);
     List<Superlative>? regularSeason = calculateMostWeeksAtOne(statsRoster); // most weeks at 1 "Regular Season MVP"
     List<Superlative>? bridesmaid = calculateMostWeeksAtTwo(statsRoster); // most weeks at 2 "Always the Bridesmaid"
-
-    // most weeks in bottom 50% "Survivor"
-    // most weeks in top 50% "Not Riskin It"
+    List<Superlative>? survivor = calculate50Percent(statsRoster, true); // most weeks in bottom 50% "Survivor"
+    List<Superlative>? noRisk = calculate50Percent(statsRoster, false); // most weeks in top 50% "Not Riskin It"
 
     // Players
     // players with most unique teams "journeyman"
@@ -81,6 +80,24 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: bridesmaid,
         title: "Always the Bridesmaid",
         subtitle: "Most 2nd Placements",
+        diffTag: false,
+      ));
+    }
+
+    if (survivor != null && survivor.isNotEmpty) {
+      cards.add(SuperlativesCard(
+        superlatives: survivor,
+        title: "Survivor",
+        subtitle: "Most Bottom 50% Showings per Week",
+        diffTag: false,
+      ));
+    }
+
+    if (noRisk != null && noRisk.isNotEmpty) {
+      cards.add(SuperlativesCard(
+        superlatives: noRisk,
+        title: "No Risk",
+        subtitle: "Most Top 50% Showings per Week",
         diffTag: false,
       ));
     }
@@ -328,5 +345,72 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     }
 
     return mostAtTwoList;
+  }
+
+  List<Superlative>? calculate50Percent(List<RosterLeague> allRosters, bool topHalf) {
+    if (allRosters.length < 2) return null;
+
+    Map<RosterLeague, int> bottomHalfCounts = {};
+    Map<RosterLeague, List<int>> bottomHalfWeeks = {};
+    Map<RosterLeague, List<double>> bottomHalfScores = {};
+
+    // Initialize our tracking maps
+    for (var roster in allRosters) {
+      bottomHalfCounts[roster] = 0;
+      bottomHalfWeeks[roster] = [];
+      bottomHalfScores[roster] = [];
+    }
+
+    int maxWeek = allRosters.first.truePoints.length;
+
+    for (int week = 0; week < maxWeek; week++) {
+      List<MapEntry<RosterLeague, double>> weekData = [];
+
+      for (var roster in allRosters) {
+        if (week < roster.truePoints.length && roster.truePoints[week] > 1.0) {
+          double points = roster.truePoints[week];
+          weekData.add(MapEntry(roster, points));
+        }
+      }
+
+      weekData.sort((a, b) => topHalf
+              ? a.value.compareTo(b.value) // For bottom half (ascending)
+              : b.value.compareTo(a.value) // For top half (descending)
+          );
+
+      // Find the half (50 percent) index so that we may figure out which half we care for
+      // int halfIndex = weekData.length ~/ 2;
+
+      // Find top 25%
+      int quarterIndex = (weekData.length * 0.25).ceil(); // Use ceil to round up
+
+      for (int i = 0; i < quarterIndex; i++) {
+        var roster = weekData[i].key;
+        var score = weekData[i].value;
+
+        bottomHalfCounts[roster] = bottomHalfCounts[roster]! + 1;
+        bottomHalfWeeks[roster]!.add(week + 1); // +1 because weeks are 1-indexed
+        bottomHalfScores[roster]!.add(score);
+      }
+    }
+
+    int maxCount = bottomHalfCounts.values.isEmpty ? 0 : bottomHalfCounts.values.reduce(max);
+    if (maxCount == 0) return null;
+
+    // Create superlatives for the rosters with the maximum count
+    List<Superlative> result = [];
+    bottomHalfCounts.forEach((roster, count) {
+      if (count == maxCount) {
+        result.add(Superlative(
+          title: topHalf ? "Top Half No Risk" : "Bottom Half Survivor",
+          subtitle: "Spent $maxCount weeks in this half",
+          playerName: roster.displayName,
+          weeks: bottomHalfWeeks[roster]!,
+          scores: bottomHalfScores[roster]!,
+        ));
+      }
+    });
+
+    return result;
   }
 }
