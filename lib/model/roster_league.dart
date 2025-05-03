@@ -45,7 +45,7 @@ class RosterLeagueCalculator {
     final rosterDeathWeeks = <int, int>{};
 
     for (final week in allWeeks) {
-      print(week);
+      // print(week);
       double lowestScore = double.infinity;
       int lowestScoreRosterId = -1;
       for (final roster in allRosterLeagues) {
@@ -60,7 +60,7 @@ class RosterLeagueCalculator {
         }
       }
 
-      print(lowestScoreRosterId);
+      // print(lowestScoreRosterId);
 
       if (lowestScoreRosterId != -1) {
         deadRosters.add(lowestScoreRosterId);
@@ -68,8 +68,8 @@ class RosterLeagueCalculator {
       }
     }
 
-    print(rosterDeathWeeks);
-    print(deadRosters);
+    // print(rosterDeathWeeks);
+    // print(deadRosters);
 
     for (final roster in allRosterLeagues) {
       roster.truePoints = [];
@@ -79,9 +79,9 @@ class RosterLeagueCalculator {
 
       final deathWeek = isDead ? rosterDeathWeeks[roster.rosterId] : 100;
 
-      print(roster.displayName);
-      print(roster.rosterId);
-      print(deathWeek);
+      // print(roster.displayName);
+      // print(roster.rosterId);
+      // print(deathWeek);
 
       for (final week in allWeeks) {
         final weekScore = roster.weeks[week]?.points ?? 0.0;

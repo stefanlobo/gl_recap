@@ -5,6 +5,7 @@ import 'package:guillotine_recap/model/matchup_week.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/model/league.dart';
 import 'package:guillotine_recap/model/roster.dart';
+import 'package:guillotine_recap/model/transaction.dart';
 import 'package:guillotine_recap/model/user.dart';
 import 'package:guillotine_recap/network/api_service.dart';
 import 'package:guillotine_recap/network/error_handler.dart';
@@ -21,8 +22,7 @@ class SleeperRepositoryImpl implements SleeperRepository {
     try {
       print("Fetching rosters with ID: $leagueId"); // Debug print
 
-      final response =
-          await _apiService.get(endPoint: "league/$leagueId/rosters");
+      final response = await _apiService.get(endPoint: "league/$leagueId/rosters");
 
       if (response.statusCode != 200) {
         print("Non-200 status code: ${response.statusCode}");
@@ -56,14 +56,13 @@ class SleeperRepositoryImpl implements SleeperRepository {
   }) async {
     int week = 1;
 
-    final Map<int, Map<int, MatchupWeek>> weeklyData = {};
+    final Map<int, Map<int, MatchupWeek>> weeklyData = {}; // Week -> RosterID -> matchup
 
     while (week <= maxWeeks) {
       try {
         print("Fetching week $week with ID: $leagueId"); // Debug print
 
-        final response =
-            await _apiService.get(endPoint: "league/$leagueId/matchups/$week");
+        final response = await _apiService.get(endPoint: "league/$leagueId/matchups/$week");
 
         if (response.statusCode != 200) {
           print("Non-200 status code: ${response.statusCode}");
@@ -77,21 +76,15 @@ class SleeperRepositoryImpl implements SleeperRepository {
 
         if (response.data is List && response.data.isEmpty) {
           print("getAllWeeks for week $week: Response data is empty list");
-          throw createEmptyDataException(response);
+          //throw createEmptyDataException(response);
+          continue;
         }
 
         if (response.statusCode == 200 && response.data != null) {
           print("Successfully parsed week $week data for ID: $leagueId");
-          final matchups =
-              convertListToModel(MatchupWeek.fromJson, response.data!);
+          final matchups = convertListToModel(MatchupWeek.fromJson, response.data!);
 
-          weeklyData[week] = {
-            for (var matchup in matchups) matchup.rosterId: matchup
-          };
-        } else if (response.data == null) {
-          print("No week $week data");
-
-          break;
+          weeklyData[week] = {for (var matchup in matchups) matchup.rosterId: matchup};
         }
       } catch (error) {
         print("Error fetching weeks under $leagueId: $error");
@@ -111,8 +104,7 @@ class SleeperRepositoryImpl implements SleeperRepository {
 
       final response = await _apiService.get(endPoint: "league/$leagueId");
 
-      print(
-          "League API response status: ${response.statusCode}"); // Debug print
+      print("League API response status: ${response.statusCode}"); // Debug print
 
       if (response.statusCode != 200) {
         print("Non-200 status code: ${response.statusCode}");
@@ -141,11 +133,11 @@ class SleeperRepositoryImpl implements SleeperRepository {
 
   @override
   Future<List<User>> getUsers({required String leagueId}) async {
+    print("Users201");
     try {
       print("Fetching users with: $leagueId"); // Debug print
 
-      final response =
-          await _apiService.get(endPoint: "league/$leagueId/users");
+      final response = await _apiService.get(endPoint: "league/$leagueId/users");
 
       print("User API response status: ${response.statusCode}"); // Debug print
 
@@ -172,5 +164,58 @@ class SleeperRepositoryImpl implements SleeperRepository {
 
       throw ErrorHandler.handle(error).failure;
     }
+  }
+
+  @override
+  Future<Map<int, List<Transaction>>> getAllTransactions({required String leagueId, int maxWeeks = 18}) async {
+    int week = 1;
+    print("Transactions101");
+    final Map<int, List<Transaction>> weeklyTransactions = {};
+    while (week <= maxWeeks) {
+      try {
+        print("Fetching transaction with: $leagueId"); // Debug print
+
+        final response = await _apiService.get(endPoint: "league/$leagueId/transaction/$week");
+
+        print("User API response status: ${response.statusCode}"); // Debug print
+
+        if (response.statusCode != 200) {
+          print("Non-200 status code: ${response.statusCode}");
+          print("Response data: ${response.data}");
+        }
+
+        if (response.data == null) {
+          print("getTransaction Response data is null");
+          throw createEmptyDataException(response);
+        }
+
+        if (response.data is List && response.data.isEmpty) {
+          print("getTransaction Response data is empty list");
+          //throw createEmptyDataException(response);
+          continue;
+        }
+
+        if (response.statusCode == 200 && response.data != null) {
+          print("Successfully parsed transaction week $week data for ID: $leagueId");
+          final transactions = convertListToModel(Transaction.fromJson, response.data!);
+
+          weeklyTransactions[week] = transactions;
+        }
+      } catch (error) {
+        print("Error fetching transactions under $leagueId: $error");
+
+        throw ErrorHandler.handle(error).failure;
+      }
+
+      week++;
+    }
+
+    weeklyTransactions.forEach((week, transactions) {
+      print('Week $week:');
+      for (var i = 0; i < transactions.length && i < 2; i++) {
+        print('  ${transactions[i]}');
+      }
+    });
+    return weeklyTransactions;
   }
 }

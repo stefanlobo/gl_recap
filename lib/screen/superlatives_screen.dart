@@ -39,8 +39,8 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     List<Superlative>? unluckyStreak = calculateUnluckyStreak(statsRoster);
     List<Superlative>? regularSeason = calculateMostWeeksAtOne(statsRoster); // most weeks at 1 "Regular Season MVP"
     List<Superlative>? bridesmaid = calculateMostWeeksAtTwo(statsRoster); // most weeks at 2 "Always the Bridesmaid"
-    List<Superlative>? survivor = calculate50Percent(statsRoster, true); // most weeks in bottom 50% "Survivor"
-    List<Superlative>? noRisk = calculate50Percent(statsRoster, false); // most weeks in top 50% "Not Riskin It"
+    List<Superlative>? survivor = calculate50Percent(statsRoster, true); // most weeks in bottom 25% "Survivor"
+    List<Superlative>? noRisk = calculate50Percent(statsRoster, false); // most weeks in top 25% "Not Riskin It"
 
     // Players
     // players with most unique teams "journeyman"
@@ -87,8 +87,8 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     if (survivor != null && survivor.isNotEmpty) {
       cards.add(SuperlativesCard(
         superlatives: survivor,
-        title: "Survivor",
-        subtitle: "Most Bottom 50% Showings per Week",
+        title: "Bottom Feeder",
+        subtitle: "Most Bottom 25% Showings per Week",
         diffTag: false,
       ));
     }
@@ -97,7 +97,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
       cards.add(SuperlativesCard(
         superlatives: noRisk,
         title: "No Risk",
-        subtitle: "Most Top 50% Showings per Week",
+        subtitle: "Most Top 25% Showings per Week",
         diffTag: false,
       ));
     }
@@ -382,7 +382,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
       // int halfIndex = weekData.length ~/ 2;
 
       // Find top 25%
-      int quarterIndex = (weekData.length * 0.25).ceil(); // Use ceil to round up
+      int quarterIndex = (weekData.length * 0.25).floor(); // Use ceil to round up
 
       for (int i = 0; i < quarterIndex; i++) {
         var roster = weekData[i].key;

@@ -6,6 +6,7 @@ import 'package:guillotine_recap/model/league.dart';
 import 'package:guillotine_recap/model/matchup_week.dart';
 import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
+import 'package:guillotine_recap/model/transaction.dart';
 import 'package:guillotine_recap/model/user.dart';
 import 'package:guillotine_recap/network/api_service.dart';
 import 'package:guillotine_recap/network/dio_factory.dart';
@@ -24,18 +25,14 @@ final leagueNumberProvider = StateProvider<String>((ref) {
 final leagueProvider = FutureProvider.autoDispose<League>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
 
-  final league = await ref
-      .watch(sleeperRepositoryProvider)
-      .getLeague(leagueId: leagueNumber);
+  final league = await ref.watch(sleeperRepositoryProvider).getLeague(leagueId: leagueNumber);
 
   return league;
 });
 
 final rosterProvider = FutureProvider.autoDispose<List<Roster>>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
-  final rosters = await ref
-      .watch(sleeperRepositoryProvider)
-      .getRoster(leagueId: leagueNumber);
+  final rosters = await ref.watch(sleeperRepositoryProvider).getRoster(leagueId: leagueNumber);
 
   return rosters;
 });
@@ -43,19 +40,14 @@ final rosterProvider = FutureProvider.autoDispose<List<Roster>>((ref) async {
 final usersProvider = FutureProvider.autoDispose<List<User>>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
 
-  final users = await ref
-      .watch(sleeperRepositoryProvider)
-      .getUsers(leagueId: leagueNumber);
+  final users = await ref.watch(sleeperRepositoryProvider).getUsers(leagueId: leagueNumber);
 
   return users;
 });
 
-final weeksProvider =
-    FutureProvider.autoDispose<Map<int, Map<int, MatchupWeek>>>((ref) async {
+final weeksProvider = FutureProvider.autoDispose<Map<int, Map<int, MatchupWeek>>>((ref) async {
   final leagueNumber = ref.watch(leagueNumberProvider);
-  final weeks = await ref
-      .watch(sleeperRepositoryProvider)
-      .getAllWeeks(leagueId: leagueNumber);
+  final weeks = await ref.watch(sleeperRepositoryProvider).getAllWeeks(leagueId: leagueNumber);
 
   return weeks;
 });
@@ -96,17 +88,17 @@ final combinedRosterProvider = FutureProvider.autoDispose<List<RosterLeague>>(
       }
     }
 
-    // Now calculate all the derived values in one go
-    if (rosterLeagues.isNotEmpty) {
-      RosterLeagueCalculator.calculateAllRosterStats(rosterLeagues);
-    }
+    // // Now calculate all the derived values in one go
+    // if (rosterLeagues.isNotEmpty) {
+    //   RosterLeagueCalculator.calculateAllRosterStats(rosterLeagues);
+    // }
 
     return rosterLeagues;
   },
 );
 
-final filteredRosterLeaguesProvider =
-    Provider.autoDispose<List<RosterLeague>>((ref) {
+// This is for filtering out the one roster stop that you might have due to sleeper requiring an even nunmber of league members
+final filteredRosterLeaguesProvider = Provider.autoDispose<List<RosterLeague>>((ref) {
   // Get the unfiltered data
   final allRosterLeaguesAsync = ref.watch(combinedRosterProvider);
   // Get the filter
@@ -119,9 +111,7 @@ final filteredRosterLeaguesProvider =
     data: (allRosterLeagues) {
       // Apply filter if there is one
       final filteredLeagues = filteredUserName != null
-          ? allRosterLeagues
-              .where((rl) => rl.displayName != filteredUserName)
-              .toList()
+          ? allRosterLeagues.where((rl) => rl.displayName != filteredUserName).toList()
           : List<RosterLeague>.from(allRosterLeagues);
 
       // Calculate the stats if we have leagues
@@ -145,4 +135,13 @@ final filteredRosterLeaguesProvider =
       return [];
     },
   );
+});
+
+// Find all transactions so we can run stats on players
+final transactionProvider = FutureProvider.autoDispose<Map<int, List<Transaction>>>((ref) async {
+  final leagueNumber = ref.watch(leagueNumberProvider);
+
+  final transactions = await ref.watch(sleeperRepositoryProvider).getAllTransactions(leagueId: leagueNumber);
+
+  return transactions;
 });
