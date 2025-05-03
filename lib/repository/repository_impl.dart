@@ -175,7 +175,7 @@ class SleeperRepositoryImpl implements SleeperRepository {
       try {
         print("Fetching transaction with: $leagueId"); // Debug print
 
-        final response = await _apiService.get(endPoint: "league/$leagueId/transaction/$week");
+        final response = await _apiService.get(endPoint: "league/$leagueId/transactions/$week");
 
         print("User API response status: ${response.statusCode}"); // Debug print
 

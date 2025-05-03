@@ -382,7 +382,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
       // int halfIndex = weekData.length ~/ 2;
 
       // Find top 25%
-      int quarterIndex = (weekData.length * 0.25).floor(); // Use ceil to round up
+      int quarterIndex = (weekData.length * 0.25).ceil(); // Use ceil to round up
 
       for (int i = 0; i < quarterIndex; i++) {
         var roster = weekData[i].key;

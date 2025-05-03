@@ -9,7 +9,7 @@ const String accept = "accept";
 const int apiTimeOut = 60000;
 
 class DioFactory {
-  Future<Dio> getDio() async {
+  Dio getDio() {
     Dio dio = Dio();
 
     Map<String, String> headers = {
@@ -25,13 +25,13 @@ class DioFactory {
       connectTimeout: const Duration(milliseconds: apiTimeOut),
     );
 
-    if (!kReleaseMode) {
-      dio.interceptors.add(PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: true,
-      ));
-    }
+    // if (!kReleaseMode) {
+    //   dio.interceptors.add(PrettyDioLogger(
+    //     requestHeader: false,
+    //     requestBody: false,
+    //     responseHeader: false,
+    //   ));
+    // }
 
     // if (!kReleaseMode) {
     //   dio.interceptors.add(dioLoggerInterceptor);

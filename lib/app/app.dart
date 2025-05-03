@@ -21,8 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Guilottine Recap',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 145, 150, 160)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 145, 150, 160)),
         useMaterial3: true,
       ),
       home: MyHomePage(),
@@ -82,8 +81,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   width: 50,
                   child: FloatingActionButton(
                     onPressed: () {
-                      ref.read(leagueNumberProvider.notifier).state =
-                          _leagueController.text;
+                      ref.read(leagueNumberProvider.notifier).state = _leagueController.text;
                     },
                     tooltip: 'Fetch Rosters',
                     child: const Icon(
@@ -98,14 +96,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               child: Consumer(
                 builder: (context, ref, child) {
                   // Watch the allRosterLeaguesProvider to get loading/error states
-                  final allRosterLeaguesAsync =
-                      ref.watch(combinedRosterProvider);
+                  final allRosterLeaguesAsync = ref.watch(combinedRosterProvider);
                   final leagueAsync = ref.watch(leagueProvider);
 
                   // Watch the filtered results (not async)
-                  final filteredRosters =
-                      ref.watch(filteredRosterLeaguesProvider);
+                  final filteredRosters = ref.watch(filteredRosterLeaguesProvider);
                   final currentFilter = ref.watch(filterUserIdProvider);
+
+                  //final transactions = ref.watch(transactionProvider);
+                  
 
                   return allRosterLeaguesAsync.when(
                     loading: () => Center(child: CircularProgressIndicator()),
@@ -139,17 +138,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                   onSelected: (String? newValue) {
                                     setState(() {
                                       selectedUser = newValue;
-                                      ref
-                                          .read(filterUserIdProvider.notifier)
-                                          .state = newValue ==
-                                              'None'
-                                          ? null
-                                          : newValue;
+                                      ref.read(filterUserIdProvider.notifier).state =
+                                          newValue == 'None' ? null : newValue;
                                     });
                                   },
                                   dropdownMenuEntries: [
-                                    DropdownMenuEntry(
-                                        value: 'None', label: 'None'),
+                                    DropdownMenuEntry(value: 'None', label: 'None'),
                                     ...allDisplayNames.map((username) {
                                       final rosterId = username;
                                       final userName = username;
@@ -163,8 +157,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                             ),
                           Expanded(
                             child: FFWrappedStyleTabs(
-                                filteredRosters: filteredRosters,
-                                title: leagueAsync.value?.name ?? "League"),
+                                filteredRosters: filteredRosters, title: leagueAsync.value?.name ?? "League"),
                           ),
                         ],
                       );
