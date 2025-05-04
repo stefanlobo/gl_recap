@@ -5,9 +5,9 @@ import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/screen/standings_screen.dart';
 import 'package:guillotine_recap/screen/stats_screen.dart';
 import 'package:guillotine_recap/screen/superlatives_screen.dart';
+import 'package:guillotine_recap/screen/transactions_screen.dart';
 // Import your other screens/widgets here
 
-// Convert to ConsumerStatefulWidget to use Riverpod
 class FFWrappedStyleTabs extends ConsumerStatefulWidget {
   final List<RosterLeague> filteredRosters;
   String title = "League";
@@ -28,7 +28,7 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -79,7 +79,7 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
                 Tab(text: "Standings"),
                 Tab(text: "Matchups"),
                 Tab(text: "Superlatives"),
-                // Tab(text: "Players"),
+                Tab(text: "Players"),
               ],
             ),
           ),
@@ -89,13 +89,13 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
         controller: _tabController,
         children: [
           // Tab 1: Standings
-          Standings(filteredRosters: widget.filteredRosters),
+          Standings(),
           // Tab 2: Closest Matchups
           StatsScreen(),
           //Tab 3: Superlatives
           SuperlativesScreen(),
-          // // Tab 4: Team Recaps
-          // Center(child: Text("Team Recaps Tab")),
+          // // Tab 4: Transactions
+          TransactionScreen(),
         ],
       ),
     );

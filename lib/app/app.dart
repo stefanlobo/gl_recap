@@ -103,9 +103,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   final filteredRosters = ref.watch(filteredRosterLeaguesProvider);
                   final currentFilter = ref.watch(filterUserIdProvider);
 
-                  //final transactions = ref.watch(transactionProvider);
-                  
-
                   return allRosterLeaguesAsync.when(
                     loading: () => Center(child: CircularProgressIndicator()),
                     error: (error, stack) {
