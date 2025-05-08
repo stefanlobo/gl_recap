@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:guillotine_recap/model/player.dart';
 
 final playersProvider = FutureProvider<Map<String, Player>>((ref) async {
+  ref.keepAlive();
   return await PlayerDataService().loadPlayers();
 });
 

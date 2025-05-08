@@ -60,7 +60,7 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
     Colors.lightGreen,
     Colors.lightBlue,
     Colors.deepOrange,
-    Colors.black,
+    Colors.grey,
     Colors.blueGrey,
     Colors.deepPurple,
     Colors.yellow,
@@ -498,11 +498,11 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
   Widget buildLegend(List<Color> colors) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
+      // decoration: BoxDecoration(
+      //   color: const Color.fromARGB(255, 185, 19, 19),
+      //   borderRadius: BorderRadius.circular(8.0),
+      //   border: Border.all(color: Colors.grey.shade300),
+      // ),
       child: Wrap(
         direction: Axis.horizontal,
         spacing: 8.0,

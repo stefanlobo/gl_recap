@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:guillotine_recap/model/head_to_head.dart';
 import 'package:guillotine_recap/model/player.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
@@ -44,33 +45,55 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                     child: Text('Error loading player data: $error'),
                   ),
               data: (players) {
-                final mostPickedUp = calculateMostPickedUp(transactions, players);
+                List<Player>? mostPickedUp = calculateMostPickedUp(transactions, players);
                 final totalWaiverCost = calculateTotalWavier(transactions, players);
                 final mostDropped = calculateMostDropped(transactions, players);
                 final mostDroppedCommish = calculateMostDroppedCommish(transactions, players);
+
+                final List<Widget> cards = [];
+
+                if (mostPickedUp != null && mostPickedUp.isNotEmpty) {
+                  cards.add(PlayersCard(
+                    players: mostPickedUp,
+                    title: "Most Picked Up",
+                  ));
+                }
+
+                if (totalWaiverCost != null && totalWaiverCost.isNotEmpty) {
+                  cards.add(PlayersCard(
+                    players: totalWaiverCost,
+                    title: "Most Expensive",
+                  ));
+                }
+
+                if (mostDropped != null && mostDropped.isNotEmpty) {
+                  cards.add(PlayersCard(
+                    players: mostDropped,
+                    title: "Most Dropped (Total)",
+                  ));
+                }
+
+                if (mostDroppedCommish != null && mostDroppedCommish.isNotEmpty) {
+                  cards.add(PlayersCard(
+                    players: mostDroppedCommish,
+                    title: "Most Dropped (Commish)",
+                  ));
+                }
+
                 return SingleChildScrollView(
                   child: Center(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
+                        maxWidth: min(screenWidth * 0.95, 1000), // Constrain max width, use min to avoid overflows
                       ),
-                      child: Wrap(
-                        alignment: WrapAlignment.spaceEvenly,
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          PlayersCard(
-                            players: mostPickedUp,
-                            title: "Most Picked Up",
-                          ),
-                          PlayersCard(players: totalWaiverCost, title: "Most Expensive"),
-                          PlayersCard(players: mostDropped, title: "Most Dropped (Total)"),
-                          PlayersCard(players: mostDroppedCommish, title: "Most Dropped (Commish)")
-
-                          // MatchupCard(matchups: closestMatchups, title: "Tight Race", subtitle: "Ouch Matchup"),
-                          // MatchupCard(matchups: furthestBottomTwo, title: "Not Even Close", subtitle: "Furthest Matchup"),
-                          // MatchupCard(matchups: largestTopBottom, title: "David vs Goliath", subtitle: "Demolished")
-                        ],
+                      child: MasonryGridView.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: cards.length,
+                        itemBuilder: (context, index) => cards[index],
                       ),
                     ),
                   ),

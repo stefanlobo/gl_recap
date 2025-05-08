@@ -11,6 +11,8 @@ import 'package:guillotine_recap/repository/repository.dart';
 import 'package:guillotine_recap/app/di.dart';
 import 'package:guillotine_recap/screen/standings_screen.dart';
 import 'package:guillotine_recap/screen/tabs_screen.dart';
+import 'package:guillotine_recap/presentation/util.dart';
+import 'package:guillotine_recap/presentation/theme.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -18,12 +20,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final brightness = View.of(context).platformDispatcher.platformBrightness;
+    TextTheme textTheme = createTextTheme(context, "Merriweather Sans", "Josefin Sans");
+    MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
       title: 'Guilottine Recap',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 145, 150, 160)),
-        useMaterial3: true,
-      ),
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: MyHomePage(),
     );
   }
@@ -57,8 +59,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Guillotine Recap Information"),
+        //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text("Guillotine Recap"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

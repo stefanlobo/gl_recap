@@ -139,6 +139,7 @@ final filteredRosterLeaguesProvider = Provider.autoDispose<List<RosterLeague>>((
 
 // Find all transactions so we can run stats on players
 final transactionProvider = FutureProvider.autoDispose<Map<int, List<Transaction>>>((ref) async {
+  ref.keepAlive();
   final leagueNumber = ref.watch(leagueNumberProvider);
 
   final transactions = await ref.watch(sleeperRepositoryProvider).getAllTransactions(leagueId: leagueNumber);
