@@ -65,33 +65,37 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                TextField(
-                  controller: _leagueController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Enter League ID',
-                    constraints: BoxConstraints(maxWidth: 225.0),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  height: 50,
-                  width: 50,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      ref.read(leagueNumberProvider.notifier).state = _leagueController.text;
-                    },
-                    tooltip: 'Fetch Rosters',
-                    child: const Icon(
-                      Icons.refresh,
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _leagueController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Enter League ID',
+                      constraints: BoxConstraints(maxWidth: 225.0),
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Container(
+                    height: 50,
+                    width: 50,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        ref.read(leagueNumberProvider.notifier).state = _leagueController.text;
+                      },
+                      tooltip: 'Fetch Rosters',
+                      child: const Icon(
+                        Icons.refresh,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -127,32 +131,35 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       });
 
                       return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (filteredRosters.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: DropdownMenu<String>(
-                                  initialSelection: selectedUser,
-                                  onSelected: (String? newValue) {
-                                    setState(() {
-                                      selectedUser = newValue;
-                                      ref.read(filterUserIdProvider.notifier).state =
-                                          newValue == 'None' ? null : newValue;
-                                    });
-                                  },
-                                  dropdownMenuEntries: [
-                                    DropdownMenuEntry(value: 'None', label: 'None'),
-                                    ...allDisplayNames.map((username) {
-                                      final rosterId = username;
-                                      final userName = username;
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: DropdownMenu<String>(
+                                    width: 287,
+                                    initialSelection: selectedUser,
+                                    onSelected: (String? newValue) {
+                                      setState(() {
+                                        selectedUser = newValue;
+                                        ref.read(filterUserIdProvider.notifier).state =
+                                            newValue == 'None' ? null : newValue;
+                                      });
+                                    },
+                                    dropdownMenuEntries: [
+                                      DropdownMenuEntry(value: 'None', label: 'None'),
+                                      ...allDisplayNames.map((username) {
+                                        final rosterId = username;
+                                        final userName = username;
 
-                                      return DropdownMenuEntry<String>(
-                                        value: username,
-                                        label: username,
-                                      );
-                                    }),
-                                  ]),
+                                        return DropdownMenuEntry<String>(
+                                          value: username,
+                                          label: username,
+                                        );
+                                      }),
+                                    ]),
+                              ),
                             ),
                           Expanded(
                             child: FFWrappedStyleTabs(

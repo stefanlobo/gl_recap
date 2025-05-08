@@ -85,18 +85,21 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
           ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Tab 1: Standings
-          Standings(),
-          // Tab 2: Closest Matchups
-          StatsScreen(),
-          //Tab 3: Superlatives
-          SuperlativesScreen(),
-          // // Tab 4: Transactions
-          TransactionScreen(),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            // Tab 1: Standings
+            Standings(),
+            // Tab 2: Closest Matchups
+            StatsScreen(),
+            //Tab 3: Superlatives
+            SuperlativesScreen(),
+            // // Tab 4: Transactions
+            TransactionScreen(),
+          ],
+        ),
       ),
     );
   }
