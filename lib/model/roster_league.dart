@@ -21,6 +21,14 @@ class RosterLeague {
 
   int get weeksLength => weeks.length;
 
+  String get avatarUrl {
+    if (avatar.startsWith("https")) {
+      return avatar;
+    } else {
+      return 'https://sleepercdn.com/avatars/thumbs/$avatar';
+    }
+  }
+
   RosterLeague({
     required this.userId,
     required this.displayName,

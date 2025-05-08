@@ -181,8 +181,19 @@ class Standings extends ConsumerWidget {
   List<DataRow> _createRows(List<RosterLeague> sortedRosters) {
     return sortedRosters.map((e) {
       bool winner = isWinner(e);
+      print(e.avatar);
       return DataRow(cells: [
-        DataCell(Text(e.displayName)),
+        DataCell(Row(
+          children: [
+            CircleAvatar(
+              radius: 12,
+              backgroundImage: NetworkImage(e.avatarUrl),
+              onBackgroundImageError: (_, __) => Icon(Icons.person),
+            ),
+            SizedBox(width: 12),
+            Text(e.displayName),
+          ],
+        )),
         DataCell(
           Row(
             children: [

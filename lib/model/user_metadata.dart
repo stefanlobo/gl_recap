@@ -5,14 +5,17 @@ part 'user_metadata.g.dart';
 @JsonSerializable()
 class UserMetadata {
   @JsonKey(name: 'team_name')
-  final String teamName;
+  final String? teamName;
+
+  @JsonKey(name: "avatar")
+  final String? avatar;
 
   UserMetadata({
-    required this.teamName,
+    this.teamName,
+    this.avatar,
   });
 
-  factory UserMetadata.fromJson(Map<String, dynamic> json) =>
-      _$UserMetadataFromJson(json);
+  factory UserMetadata.fromJson(Map<String, dynamic> json) => _$UserMetadataFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserMetadataToJson(this);
 }

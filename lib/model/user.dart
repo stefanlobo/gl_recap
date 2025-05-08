@@ -14,8 +14,8 @@ class User {
   @JsonKey(name: 'avatar')
   final String avatar;
 
-  // @JsonKey(name: 'metadata')
-  // final UserMetadata metadata;
+  @JsonKey(name: 'metadata')
+  final UserMetadata? metadata;
 
   // @JsonKey(name: 'is_owner')
   // final bool isOwner;
@@ -23,10 +23,9 @@ class User {
   User({
     required this.userId,
     required this.displayName,
-    required this.avatar,
-    // required this.metadata,
-    // required this.isOwner,
-  });
+    required String avatar,
+    this.metadata,
+  }) : avatar = metadata?.avatar ?? avatar;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
