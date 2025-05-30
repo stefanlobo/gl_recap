@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guillotine_recap/widgets/charts_card.dart';
@@ -71,17 +72,20 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: _leagueController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Enter League ID',
-                      constraints: BoxConstraints(maxWidth: 225.0),
-                      border: OutlineInputBorder(),
+                  Container(
+                    margin: EdgeInsets.only(left: 90),
+                    child: TextField(
+                      controller: _leagueController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Enter League ID',
+                        constraints: BoxConstraints(maxWidth: 225.0),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
                   Container(
+                    margin: EdgeInsets.only(left: 12),
                     height: 50,
                     width: 50,
                     child: FloatingActionButton(
@@ -121,7 +125,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       }
 
                       // Create a list of all display names for the dropdown
-                      final allDisplayNames = <String>[];
+                      final allDisplayNames = <String>['None'];
 
                       // Add the display names from the unfiltered data
                       allRosterLeaguesAsync.value?.forEach((roster) {
@@ -137,28 +141,35 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                             Center(
                               child: Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
-                                child: DropdownMenu<String>(
-                                    width: 287,
-                                    initialSelection: selectedUser,
-                                    onSelected: (String? newValue) {
-                                      setState(() {
-                                        selectedUser = newValue;
-                                        ref.read(filterUserIdProvider.notifier).state =
-                                            newValue == 'None' ? null : newValue;
-                                      });
-                                    },
-                                    dropdownMenuEntries: [
-                                      DropdownMenuEntry(value: 'None', label: 'None'),
-                                      ...allDisplayNames.map((username) {
-                                        final rosterId = username;
-                                        final userName = username;
-
-                                        return DropdownMenuEntry<String>(
-                                          value: username,
-                                          label: username,
-                                        );
-                                      }),
-                                    ]),
+                                child: DropdownButton2<String>(
+                                  isExpanded: true,
+                                  hint: Text(
+                                    'Select League Member to Exclude',
+                                  ),
+                                  items: allDisplayNames
+                                      .map((String item) => DropdownMenuItem<String>(
+                                            value: item,
+                                            child: Text(
+                                              item,
+                                            ),
+                                          ))
+                                      .toList(),
+                                  value: selectedUser,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedUser = value;
+                                      ref.read(filterUserIdProvider.notifier).state = value == 'None' ? null : value;
+                                    });
+                                  },
+                                  buttonStyleData: const ButtonStyleData(
+                                    padding: EdgeInsets.symmetric(horizontal: 16),
+                                    height: 40,
+                                    width: 200,
+                                  ),
+                                  menuItemStyleData: const MenuItemStyleData(
+                                    height: 30,
+                                  ),
+                                ),
                               ),
                             ),
                           Expanded(
