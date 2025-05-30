@@ -3,9 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'package:guillotine_recap/model/player.dart';
 
+// Create a provider that loads data at startup
+final playerDataInitProvider = Provider<Future<Map<String, Player>>>((ref) {
+  // This will be created only once
+  return PlayerDataService().loadPlayers();
+});
+
+// Then create a consumer provider that uses the init provider
 final playersProvider = FutureProvider<Map<String, Player>>((ref) async {
-  ref.keepAlive();
-  return await PlayerDataService().loadPlayers();
+  // This just returns the data that was already loaded
+  return await ref.watch(playerDataInitProvider);
 });
 
 class PlayerDataService {

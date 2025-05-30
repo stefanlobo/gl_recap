@@ -83,19 +83,22 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                 return SingleChildScrollView(
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: min(screenWidth * 0.95, 1000), // Constrain max width, use min to avoid overflows
-                      ),
-                      child: MasonryGridView.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: cards.length,
-                        itemBuilder: (context, index) => cards[index],
-                      ),
-                    ),
+                        constraints: BoxConstraints(
+                          maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
+                        ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Wrap(
+                              alignment: WrapAlignment.spaceEvenly,
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: List.generate(
+                                cards.length,
+                                (index) => cards[index],
+                              ),
+                            );
+                          },
+                        )),
                   ),
                 );
               });
