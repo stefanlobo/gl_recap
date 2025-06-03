@@ -1,8 +1,12 @@
+import 'dart:math';
 import 'dart:ui';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:guillotine_recap/app/convert.dart';
+import 'package:guillotine_recap/presentation/guillotine_icon.dart';
 import 'package:guillotine_recap/widgets/charts_card.dart';
 import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/network/api_service.dart';
@@ -14,6 +18,7 @@ import 'package:guillotine_recap/screen/standings_screen.dart';
 import 'package:guillotine_recap/screen/tabs_screen.dart';
 import 'package:guillotine_recap/presentation/util.dart';
 import 'package:guillotine_recap/presentation/theme.dart';
+import 'package:simple_icons/simple_icons.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -56,12 +61,114 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     super.dispose();
   }
 
+  Future<void> launch(String url, {bool isNewTab = true}) async {
+    await launchUrl(
+      Uri.parse(url),
+      webOnlyWindowName: isNewTab ? '_blank' : '_self',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final contentWidth = getContentWidth(context);
+
     return Scaffold(
-      appBar: AppBar(
-        //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Guillotine Recap"),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          automaticallyImplyLeading: false, // Remove default back button
+          titleSpacing: 0, // Remove default spacing
+          title: Center(
+            child: Container(
+              width: contentWidth, // Use the same width constraint as content
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  CustomPaint(painter: GuillotineIcon(), size: Size(40, 40)),
+                  Padding(padding: EdgeInsets.only(right: 8.0)),
+                  Expanded(child: Text("Guillotine Recap")),
+                  IconButton(
+                      icon: const Icon(
+                        Icons.info,
+                        semanticLabel: "Info",
+                      ),
+                      iconSize: 25,
+                      highlightColor: Colors.transparent, // Removes the highlight color
+                      splashColor: Colors.transparent, // Removes the splash effect
+                      hoverColor: Colors.transparent, // Removes hover color
+                      focusColor: Colors.transparent, // Removes focus color
+                      splashRadius: 0.001, // Minimizes splash radius
+                      tooltip: "Info",
+                      onPressed: () {
+                        showDialog(
+                          context: context, // This is required
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              insetPadding: EdgeInsets.all(2),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    width: 500,
+                                    padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "About",
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(height: 5),
+                                        Divider(thickness: 1.5),
+                                        SizedBox(height: 5),
+                                        Text(
+                                          "This website is designed for the Guillotine league format. \n\n"
+                                          "In this format, the team with the lowest score each week is eliminated from the league. Once "
+                                          "eliminated, all of that team's players are dropped and become available on the waiver wire. Remaining  "
+                                          "managers can then use their budget to bid on these newly available players. The last team standing at "
+                                          "the end of the season wins. \n\n"
+                                          "On this site, you'll find fun stats, weekly standings charts, and interesting player insights throughout the season.",
+                                          style: TextStyle(fontSize: 16),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                  IconButton(
+                    icon: Icon(
+                      SimpleIcons.github,
+                      semanticLabel: "Github",
+                    ),
+                    highlightColor: Colors.transparent, // Removes the highlight color
+                    splashColor: Colors.transparent, // Removes the splash effect
+                    hoverColor: Colors.transparent, // Removes hover color
+                    focusColor: Colors.transparent, // Removes focus color
+                    splashRadius: 0.001, // Minimizes splash radius
+                    tooltip: "Github",
+                    onPressed: () {
+                      launch("https://github.com/stefanlobo/gl_recap", isNewTab: true);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -73,7 +180,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    margin: EdgeInsets.only(left: 90),
+                    margin: EdgeInsets.fromLTRB(50, 0, 0, 0),
                     child: TextField(
                       controller: _leagueController,
                       keyboardType: TextInputType.number,
@@ -101,7 +208,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
             Expanded(
               child: Consumer(
                 builder: (context, ref, child) {
@@ -134,17 +240,23 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         }
                       });
 
+                      // Make sure selectedUser exists in the current list
+                      if (selectedUser != null && selectedUser != 'None' && !allDisplayNames.contains(selectedUser)) {
+                        // Reset if not found
+                        selectedUser = 'None';
+                      }
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (filteredRosters.isNotEmpty)
                             Center(
                               child: Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
+                                padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
                                 child: DropdownButton2<String>(
                                   isExpanded: true,
                                   hint: Text(
-                                    'Select League Member to Exclude',
+                                    'Exclusion',
                                   ),
                                   items: allDisplayNames
                                       .map((String item) => DropdownMenuItem<String>(
@@ -173,8 +285,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                               ),
                             ),
                           Expanded(
-                            child: FFWrappedStyleTabs(
-                                filteredRosters: filteredRosters, title: leagueAsync.value?.name ?? "League"),
+                            child: FFWrappedStyleTabs(filteredRosters: filteredRosters),
                           ),
                         ],
                       );

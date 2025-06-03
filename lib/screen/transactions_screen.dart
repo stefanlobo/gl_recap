@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:guillotine_recap/app/convert.dart';
 import 'package:guillotine_recap/model/head_to_head.dart';
 import 'package:guillotine_recap/model/player.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
@@ -31,7 +32,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
     final playersAsync = ref.watch(playersProvider);
 
     // Get the screen width to help with sizing
-    final screenWidth = MediaQuery.of(context).size.width;
+    final contentWidth = getContentWidth(context);
 
     return yearTransactions.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -84,7 +85,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                   child: Center(
                     child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
+                          maxWidth: contentWidth, // Constrain max width, use min to avoid overflows
                         ),
                         child: LayoutBuilder(
                           builder: (context, constraints) {

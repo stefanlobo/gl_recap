@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/screen/standings_screen.dart';
@@ -10,11 +11,9 @@ import 'package:guillotine_recap/screen/transactions_screen.dart';
 
 class FFWrappedStyleTabs extends ConsumerStatefulWidget {
   final List<RosterLeague> filteredRosters;
-  String title = "League";
 
   FFWrappedStyleTabs({
     Key? key,
-    required this.title,
     required this.filteredRosters,
   }) : super(key: key);
 
@@ -42,11 +41,58 @@ class _FFWrappedStyleTabsState extends ConsumerState<FFWrappedStyleTabs> with Si
     // Access the leagueProvider data here
     final leagueAsync = ref.watch(leagueProvider);
 
+    // Get the league name from the provider
+    final leagueName = leagueAsync.when(
+      data: (league) => league?.name ?? "League",
+      loading: () => "Loading...",
+      error: (_, __) => "League",
+    );
+
+    final avatarWidget = leagueAsync.when(
+      data: (league) {
+        final avatarUrl = league?.getAvatarUrl();
+        return avatarUrl != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(15.0),
+                child: Image.network(
+                  avatarUrl,
+                  height: 50.0,
+                  width: 50.0,
+                  fit: BoxFit.cover,
+                ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(15.0), //or 15.0
+                child: Container(
+                  height: 50.0,
+                  width: 50.0,
+                  color: Color(0xffFF0E58),
+                  child: Icon(Icons.sports_football),
+                ),
+              );
+      },
+      loading: () => CircleAvatar(child: CircularProgressIndicator(strokeWidth: 2)),
+      error: (_, __) => CircleAvatar(child: Icon(Icons.error)),
+    );
+
     return Scaffold(
       appBar: AppBar(
         // Use the league name in the title when available
         centerTitle: true,
-        title: Text(widget.title),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: avatarWidget,
+            ),
+            Text(leagueName),
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: avatarWidget,
+            ),
+          ],
+        ),
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight),

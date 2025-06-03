@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:guillotine_recap/app/convert.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/widgets/charts_card.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
@@ -126,14 +127,13 @@ class Standings extends ConsumerWidget {
     final sortState = ref.watch(standingsSortProvider);
     final sortedRosters = sortState.sortedRosters;
 
-    // Get the screen width to help with sizing
-    final screenWidth = MediaQuery.of(context).size.width;
+    final contentWidth = getContentWidth(context);
 
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: min(screenWidth * 0.95, 1500), // Constrain max width, use min to avoid overflows
+              maxWidth: contentWidth, // Constrain max width, use min to avoid overflows
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

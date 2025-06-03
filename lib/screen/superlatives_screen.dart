@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:guillotine_recap/app/convert.dart';
 import 'package:guillotine_recap/model/head_to_head.dart';
 import 'package:guillotine_recap/model/roster.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
@@ -33,7 +34,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
     statsRoster = List.from(filteredRoster);
 
     // Get the screen width to help with sizing
-    final screenWidth = MediaQuery.of(context).size.width;
+    final contentWidth = getContentWidth(context);
 
     List<Superlative>? biggestDrop = calculateBiggestDrop(statsRoster);
     List<Superlative>? unluckyStreak = calculateUnluckyStreak(statsRoster);
@@ -106,7 +107,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: min(screenWidth * 0.95, 1500), // Constrain max width, use min to avoid overflows
+            maxWidth: contentWidth, // Constrain max width, use min to avoid overflows
           ),
           child: MasonryGridView.count(
             crossAxisCount: 2,

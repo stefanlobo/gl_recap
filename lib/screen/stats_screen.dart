@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:guillotine_recap/app/convert.dart';
 import 'package:guillotine_recap/model/head_to_head.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
@@ -28,7 +29,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     statsRoster = List.from(filteredRoster);
 
     // Get the screen width to help with sizing
-    final screenWidth = MediaQuery.of(context).size.width;
+    final contentWidth = getContentWidth(context);
 
     final closestMatchups = calculateClosestMatchups(statsRoster);
     final furthestBottomTwo = calculateFurthestBottomTwo(statsRoster);
@@ -38,7 +39,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: min(screenWidth * 0.95, 2000), // Constrain max width, use min to avoid overflows
+            maxWidth: contentWidth, // Constrain max width, use min to avoid overflows
           ),
           child: Wrap(
             alignment: WrapAlignment.spaceEvenly,

@@ -45,6 +45,26 @@ class League {
 
   League();
 
+  /// Get a valid avatar URL or return null if none exists
+  String? getAvatarUrl() {
+    // Check if avatar is null or empty
+    if (avatar == null || avatar!.isEmpty) {
+      return null;
+    }
+
+    // If the URL is already absolute, return it
+    if (avatar!.startsWith('http')) {
+      return avatar;
+    }
+
+    return 'https://sleepercdn.com/avatars/thumbs/$avatar';
+  }
+
+  /// Get default avatar if none exists
+  String getAvatarUrlWithDefault() {
+    return getAvatarUrl() ?? 'https://sleepercdn.com/images/v2/icons/league/nfl/red.png';
+  }
+
   /// Connect the generated [_$LeagueFromJson] function to the `fromJson`
   /// factory.
   factory League.fromJson(Map<String, dynamic> json) => _$LeagueFromJson(json);
