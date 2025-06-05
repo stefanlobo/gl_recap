@@ -54,6 +54,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: biggestDrop,
         title: "Biggest Drop to Death",
         subtitle: "Largest Drop",
+        description: "Largest drop from previous week to a player's elimination",
         diffTag: true,
       ));
     }
@@ -63,6 +64,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: unluckyStreak,
         title: "Unlucky Streak",
         subtitle: "Unlucky",
+        description: "Number of weeks after elimination where a player's death score would have been enough to survive",
         diffTag: false,
       ));
     }
@@ -72,6 +74,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: regularSeason,
         title: "Regular Season MVP",
         subtitle: "Most 1st Placements",
+        description: "Most weeks with a first-place finish",
         diffTag: false,
       ));
     }
@@ -81,6 +84,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: bridesmaid,
         title: "Always the Bridesmaid",
         subtitle: "Most 2nd Placements",
+        description: "Most weeks with a second-place finish",
         diffTag: false,
       ));
     }
@@ -90,6 +94,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: survivor,
         title: "Bottom Feeder",
         subtitle: "Most Bottom 25% Showings per Week",
+        description: "Most weeks placed in the bottom 25% of the league",
         diffTag: false,
       ));
     }
@@ -99,6 +104,7 @@ class _StatsScreenState extends ConsumerState<SuperlativesScreen> {
         superlatives: noRisk,
         title: "No Risk",
         subtitle: "Most Top 25% Showings per Week",
+        description: "Most weeks placed in the top 25% of the league",
         diffTag: false,
       ));
     }

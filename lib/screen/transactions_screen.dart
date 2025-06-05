@@ -57,6 +57,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                   cards.add(PlayersCard(
                     players: mostPickedUp,
                     title: "Most Picked Up",
+                    description: "Player with the most pickups throughout the season"
                   ));
                 }
 
@@ -64,6 +65,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                   cards.add(PlayersCard(
                     players: totalWaiverCost,
                     title: "Most Expensive",
+                    description: "Player with the highest cumulative amount of waiver money spent"
                   ));
                 }
 
@@ -71,6 +73,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                   cards.add(PlayersCard(
                     players: mostDropped,
                     title: "Most Dropped (Total)",
+                    description: "Player with the most total drops"
                   ));
                 }
 
@@ -78,6 +81,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
                   cards.add(PlayersCard(
                     players: mostDroppedCommish,
                     title: "Most Dropped (Commish)",
+                    description: "Player with the most total drops (by commissioner)"
                   ));
                 }
 

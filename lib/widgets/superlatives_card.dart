@@ -7,6 +7,7 @@ class SuperlativesCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool diffTag;
+  final String description;
 
   SuperlativesCard({
     Key? key,
@@ -14,6 +15,7 @@ class SuperlativesCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.diffTag,
+    required this.description,
   }) : super(key: key);
 
   @override
@@ -30,10 +32,17 @@ class SuperlativesCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(title),
+              child: Tooltip(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10), color: Theme.of(context).colorScheme.primaryContainer),
+                  textStyle: TextStyle(color: Colors.white),
+                  preferBelow: false,
+                  message: description,
+                  child: Text(title)),
             ),
             Flexible(
               child: ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: superlatives.length,
                 itemBuilder: (context, index) {
@@ -112,7 +121,6 @@ class SuperlativesCard extends StatelessWidget {
                           superlative.playerName ?? "Player",
                           superlative.scores,
                         ),
-                        SizedBox(height: 12),
                       ],
                     ),
                   );
@@ -155,22 +163,28 @@ class SuperlativesCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              playerName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+          Text(
+            playerName,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
           ),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodyLarge?.color, // Default text color
+          SizedBox(
+            width: 8,
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.bodyLarge?.color, // Default text color
+                  ),
+                  children: _buildScoreTextSpans(scores),
+                ),
               ),
-              children: _buildScoreTextSpans(scores),
             ),
           ),
         ],
@@ -187,7 +201,7 @@ class SuperlativesCard extends StatelessWidget {
         TextSpan(
           text: scores[i].toStringAsFixed(2),
           style: TextStyle(
-            color: i == 0 ? Colors.green : Colors.red,
+            color: i == 0 ? Color(0xffadc6ff) : Color(0xff445e91),
           ),
         ),
       );

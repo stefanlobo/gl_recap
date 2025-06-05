@@ -5,12 +5,14 @@ class MatchupCard extends StatelessWidget {
   final List<MatchupData> matchups;
   final String title;
   final String subtitle;
+  final String description;
 
   MatchupCard({
     Key? key,
     required this.matchups,
     required this.title,
     required this.subtitle,
+    required this.description,
   }) : super(key: key);
 
   @override
@@ -27,7 +29,13 @@ class MatchupCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(title),
+              child: Tooltip(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10), color: Theme.of(context).colorScheme.primaryContainer),
+                  textStyle: TextStyle(color: Colors.white),
+                  preferBelow: false,
+                  message: description,
+                  child: Text(title)),
             ),
             ListView.builder(
               physics: NeverScrollableScrollPhysics(),

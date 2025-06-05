@@ -89,6 +89,10 @@ class _PointsPerWeekGraph extends State<PointsPerWeekGraph> {
                   ),
                 ),
                 IconButton(
+                  highlightColor: Colors.transparent, // Removes the highlight color
+                  splashColor: Colors.transparent, // Removes the splash effect
+                  hoverColor: Colors.transparent, // Removes hover color
+                  focusColor: Colors.transparent, // Removes focus color
                   onPressed: () {
                     setState(() {
                       isViewChanging = true;

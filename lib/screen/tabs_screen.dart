@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:guillotine_recap/model/roster_league.dart';
 import 'package:guillotine_recap/provider/provider.dart';
 import 'package:guillotine_recap/screen/standings_screen.dart';
-import 'package:guillotine_recap/screen/stats_screen.dart';
+import 'package:guillotine_recap/screen/matchup_screen.dart';
 import 'package:guillotine_recap/screen/superlatives_screen.dart';
 import 'package:guillotine_recap/screen/transactions_screen.dart';
 // Import your other screens/widgets here

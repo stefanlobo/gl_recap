@@ -5,11 +5,13 @@ import 'package:guillotine_recap/model/player.dart';
 class PlayersCard extends StatelessWidget {
   final List<Player> players;
   final String title;
+  final String description;
 
   PlayersCard({
     Key? key,
     required this.players,
     required this.title,
+    required this.description,
   }) : super(key: key);
 
   @override
@@ -26,9 +28,13 @@ class PlayersCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                title,
-              ),
+              child: Tooltip(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10), color: Theme.of(context).colorScheme.primaryContainer),
+                  textStyle: TextStyle(color: Colors.white),
+                  preferBelow: false,
+                  message: description,
+                  child: Text(title)),
             ),
             ListView.builder(
               physics: NeverScrollableScrollPhysics(),

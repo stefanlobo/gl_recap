@@ -46,9 +46,23 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              MatchupCard(matchups: closestMatchups, title: "Tight Race", subtitle: "Ouch Matchup"),
-              MatchupCard(matchups: furthestBottomTwo, title: "Not Even Close", subtitle: "Furthest Matchup"),
-              MatchupCard(matchups: largestTopBottom, title: "David vs Goliath", subtitle: "Demolished"),
+              MatchupCard(
+                  matchups: closestMatchups,
+                  title: "Tight Race",
+                  subtitle: "Ouch Matchup",
+                  description: "Bottom two matchups in a week smallest score difference ranked"),
+              MatchupCard(
+                matchups: furthestBottomTwo,
+                title: "Not Even Close",
+                subtitle: "Furthest Matchup",
+                description: "Bottom two matchups in a week largest score difference ranked",
+              ),
+              MatchupCard(
+                matchups: largestTopBottom,
+                title: "David vs Goliath",
+                subtitle: "Demolished",
+                description: "Top in a week and bottom in a week compared score difference ranked",
+              ),
               // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
               // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
               // MatchupCard(matchups: closestMatchups, title: "Closest Bottom Two", subtitle: "Closest Matchup"),
